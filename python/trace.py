@@ -338,6 +338,26 @@ cWhisk.Save_Whiskers.argtypes = [
   POINTER( cWhisker_Seg ),
   c_int]
 
+def Debug_Load_Whiskers(filename):
+  """Return results of cWhisk.Load_Whiskers.
+  
+  Does not free this memory! Not safe other than for testing.
+  -CR
+  
+  Returns:
+    wv, nwhiskers
+    nwhiskers: int
+    wv : LP_cWhisker_Seg. Responds to w = wv[idx], where idx < nwhiskers.
+      You can convert to Whisker_Seg: Whisker_Seg(wv[idx])
+      This responds to .time, .x, .y, and .id
+  """
+  if not os.path.exists(filename):
+    raise IOError, "File not found."
+  nwhiskers = c_int(0)
+  wv = cWhisk.Load_Whiskers( filename, None, byref(nwhiskers) );
+  return wv, nwhiskers.value
+  
+
 def Load_Whiskers( filename ):
   """ Reads whisker segments from a file.
 
