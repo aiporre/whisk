@@ -55,6 +55,7 @@ file(GLOB PFILES  src/*.p)
 file(GLOB MANAGER src/manager.awk)
 include(MylibPreproc)
 mylib_preprocess(MYLIB_SRCS PFILES MANAGER)
+show(MYLIB_SRCS)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/src")
 set(MYLIB_HDRS
   include/contour_lib.h
@@ -924,22 +925,18 @@ install(PROGRAMS
     COMPONENT python)
 
 
-  ## Deprecating ui2.py
-  #install(DIRECTORY ui
-  #    DESTINATION ${DEST_UI}
-  #    COMPONENT GUI)
 install(
     TARGETS
       whisk
-      whiski
-    RUNTIME DESTINATION "${DEST_UI}/bin"
-    LIBRARY DESTINATION "${DEST_UI}/bin"
-    ARCHIVE DESTINATION "${DEST_UI}/bin"
-    BUNDLE  DESTINATION "."
+    DESTINATION "${DEST_UI}/bin"
     COMPONENT GUI)
-  #install(DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-  #  DESTINATION ${plugin_dest_dir}/plugins
-  #  COMPONENT GUI)
+if(TARGET whiski)
+    install(
+        TARGETS
+          whiski
+        DESTINATION "${DEST_UI}/bin"
+        COMPONENT GUI)
+endif()
 
 install(
     FILES
