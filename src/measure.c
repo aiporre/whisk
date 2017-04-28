@@ -123,6 +123,10 @@ void Whisker_Seg_Measure( Whisker_Seg *w, double *dest, int facex, int facey, ch
     path_length = cl[-1];
   }
 
+  // CR
+  // Need to add something here to compute PAD_FOL and PAD_TIP, based
+  // on when x and y cross the roi boundaries
+  
   // median score
   // ------------
   { qsort( s, len, sizeof(float), _score_cmp );
@@ -138,7 +142,7 @@ void Whisker_Seg_Measure( Whisker_Seg *w, double *dest, int facex, int facey, ch
 
   follicle_x = x[ idx_follicle ];
   follicle_y = y[ idx_follicle ];
-  tip_x = x[ idx_tip ];
+  tip_x = x[ idx_tip ]; // CR -- overwrite these with PAD_FOL and PAD_TIP?
   tip_y = y[ idx_tip ];
 
   // Polynomial based measurements
@@ -163,8 +167,13 @@ void Whisker_Seg_Measure( Whisker_Seg *w, double *dest, int facex, int facey, ch
     static double *workspace = NULL;
     static size_t  workspace_size = 0;
     int i;
+    
+    // CR 
+    // remove 'pad'
     const int pad = MIN( MEASURE_POLY_END_PADDING, len/4 );
 
+    // CR
+    // not sure if 't' here should take 'pad' into account
     // parameter for parametric polynomial representation
     t = request_storage(t, &t_size, sizeof(double), len, "measure");
     xd = request_storage(xd, &xd_size, sizeof(double), len, "measure");
@@ -189,6 +198,9 @@ void Whisker_Seg_Measure( Whisker_Seg *w, double *dest, int facex, int facey, ch
                                  sizeof(double), 
                                  polyfit_size_workspace( len, 2*MEASURE_POLY_FIT_DEGREE ), //need 2*degree for curvature eval later
                                  "measure: polyfit workspace" );
+    
+    // CR
+    // replace t+pad and len-2*pad with t+PAD_TIP and len-PAD_TIP-PAD_FOL
     polyfit( t+pad, xd+pad, len-2*pad, MEASURE_POLY_FIT_DEGREE, px, workspace );
     polyfit_reuse(  yd+pad, len-2*pad, MEASURE_POLY_FIT_DEGREE, py, workspace );
 
@@ -219,6 +231,7 @@ void Whisker_Seg_Measure( Whisker_Seg *w, double *dest, int facex, int facey, ch
     // Root angle
     // ----------
     { double teval = (idx_follicle == 0) ? t[pad] : t[len-pad-1];
+      // CR update the above with t[PAD_TIP] and t[len-PAD_FOL]
       static const double rad2deg = 180.0/M_PI;
       switch(face_axis)
       { case 'h':
@@ -246,11 +259,16 @@ void Whisker_Seg_Measure( Whisker_Seg *w, double *dest, int facex, int facey, ch
                     *evalden = NULL;
       static size_t evalnum_size = 0,
                     evalden_size = 0;
+      
+      // CR
+      // make npoints = len - pad_TIP - PAD_FOL
       size_t npoints = len-2*pad;
   
       evalnum = request_storage( evalnum, &evalnum_size, sizeof(double), npoints, "numerator" );
       evalden = request_storage( evalden, &evalden_size, sizeof(double), npoints, "denominator" );
   
+      // CR
+      // update the below with t+PAD_TIP
       Vandermonde_Build( t+pad, npoints, 2*MEASURE_POLY_FIT_DEGREE, V ); // used for polynomial evaluation
   
       // numerator
