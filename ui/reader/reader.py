@@ -141,11 +141,11 @@ class AdjustStippledGainReader( IMovieReader ):
     mask = im > saturation;
     #pdb.set_trace()
     if self._direction == 'horizontal':          
-      im[1::2] *= self._gain
+      im[1::2] *= int(self._gain)
       mask[::2] = 0
       im[mask] = 255
     else:
-      im[:,1::2] *= self._gain
+      im[:,1::2] *= int(self._gain)
       mask[:,::2] = 0
       im[mask] = 255
     return im
