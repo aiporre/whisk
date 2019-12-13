@@ -15,6 +15,8 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
+from __future__ import absolute_import
 from ui.genetiff import Reader
 from numpy import hypot, zeros, vander, array, matrix, matrix, diff, linspace
 from numpy import polyder, polymul, polyval, polyadd, polysub, roots
@@ -23,8 +25,9 @@ from numpy import concatenate, isfinite, mean
 import scipy.linalg
 from pylab import imshow
 import pdb
-from trace import Whisker_Seg
+from .trace import Whisker_Seg
 import sys
+from functools import reduce
 #from pylab import *
 
 def test1():
@@ -81,7 +84,7 @@ def test1():
 
 def merge_all( whiskers, shape ):
   for fid, wvd in whiskers.iteritems():
-    print fid
+    print(fid)
     merge_all_in_frame( wvd, shape )
 
 def merge_all_in_frame(wvd, shape):
@@ -183,13 +186,13 @@ class WhiskerGroup(object):
     for i,v in enumerate(self.domain()):
       names[v] = str(id(v)) #str(i) 
     
-    print >> file, "digraph %s {"%name
+    print("digraph %s {"%name, file=file)
     for k in self._graph.iterkeys():
-      print >> file, "\t%s;"%(names[k])
+      print("\t%s;"%(names[k]), file=file)
     for k,v in self._graph.iteritems():
       for e in v:
-        print >> file, "\t%s -> %s;"%(names[k],names[e])
-    print >> file, "}"
+        print("\t%s -> %s;"%(names[k],names[e]), file=file)
+    print("}", file=file)
     
   def preimage(self,a):
     """ Get preimage of a in graph """
@@ -385,19 +388,19 @@ class ResolutionGroup(WhiskerGroup):
   def resolve(self, g, w ):
     """ Merge self with g at w. """
     if w in set( g.domain() ):
-      print "involved"
+      print("involved")
       if w in self.breaks:
-        print "in the breaks"
+        print("in the breaks")
         tails = g.sinks()   - g.sources()
         roots = g.sources() - g.sinks()
         if w in roots:
-          print "\troot"
+          print("\troot")
           g.join( w, self, self.breaks[w][-1] ) # join tail to root
         elif w in tails:
-          print "\ttail"
+          print("\ttail")
           g.join( w, self, self.breaks[w][0] ) # join root to tail
         else: #middle
-          print "\tmiddle"
+          print("\tmiddle")
           g.join( w, self, self.middle )
         return g
     # didn't satisfy above, so...
@@ -521,7 +524,7 @@ def solve_polynomial_join( left, right):
   rx =  right.x[nr]
   lx =  left.x[-nl]
   L = hypot( rx-lx, ry-ly )
-  print "L:%g"%L
+  print("L:%g"%L)
   yv = matrix(   [[  ry                          ],   
                   [  ly                          ],   
                   [  dry * L                     ],   
@@ -617,7 +620,7 @@ def compute_join_err( left, right, polynomial = None ):
             [  left.y[i], polyval( py, utl[i-il[0]] ) ],'r.-')
     ion(); show();
 
-  print "r:%7.5g l:%7.5g"%( hypot( dxr, dyr ).mean() ,hypot( dxl, dyl ).mean() )
+  print("r:%7.5g l:%7.5g"%( hypot( dxr, dyr ).mean() ,hypot( dxl, dyl ).mean() ))
   return hypot( dxl, dyl ).mean() ,hypot( dxr, dyr ).mean() 
   #return d/float( len(dxr)+len(dxl) )
 
@@ -692,9 +695,11 @@ def get_next_match( map ):
 
   return retval
 
-def trace_overlap( (wa,i), (wb,j), thresh = 2.0 ):
+def trace_overlap(xxx_todo_changeme, xxx_todo_changeme1, thresh = 2.0 ):
   # assumes that indexes run along same direction (i.e. x is monitonically
   # increasing along index )
+  (wa,i) = xxx_todo_changeme
+  (wb,j) = xxx_todo_changeme1
   def dist(ia,ib):
     a,b = wa[ia], wb[ib]
     return hypot( a[0] - b[0], a[1] - b[1] )

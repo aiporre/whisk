@@ -1,8 +1,10 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import sys
 from matplotlib import cm,rc
 from matplotlib.pylab import * #imshow,draw,colorbar,clf,clabel,axis,savefig
 from numpy import *
-import roc,trace
+from . import roc,trace
 import pdb
 import traceback
 
@@ -33,7 +35,7 @@ def play_seed_angles(video,maxr=9,thresh=0.99,alpha=0.75,bg=63,every=slice(None)
     axis('off');
     draw();
     if renderto:
-      print 'Writing ',renderto%i
+      print('Writing ',renderto%i)
       sys.stdout.flush()
       savefig(renderto%i);
 

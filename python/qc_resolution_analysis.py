@@ -7,8 +7,10 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
+from __future__ import absolute_import
 import warnings
-import trace
+from . import trace
 import numpy
 from numpy import zeros
 from numpy import polyval, polyfit, linspace, arange
@@ -19,14 +21,14 @@ from scipy.ndimage import zoom
 import pdb
 
 def _thinking(args):
-  print '.',
+  print('.', end=' ')
   return args
 
 def analyze_decimation_error_types_single_frame( im, scale=0.5, xform = zoom ):
   ims  = xform(im,scale)
   shape = ims.shape
   px_scale = shape[0] / float( im.shape[0] )
-  hits = lambda (x,sc): set( zip(*where(pixelize( trace.find_segments(x), sc, shape ))) )
+  hits = lambda x_sc: set( zip(*where(pixelize( trace.find_segments(x_sc[0]), x_sc[1], shape ))) )
   gold,test = map(hits, ((im ,px_scale   ), 
                          (ims,1.0        )) )
   false_positives = test - gold
@@ -69,7 +71,7 @@ def pixelize( wv, scale, shape, im=None ):
   """
   if im is None:
     im = zeros(shape)
-  pnt2px   = lambda (x,y): (int(x*scale), int(y*scale))   # (x,y);scale --> px
+  pnt2px   = lambda x_y: (int(x_y[0]*scale), int(x_y[1]*scale))   # (x,y);scale --> px
   fit = lambda v: polyfit( arange(len(v)), v, 5 )
   #seg2pxs  = lambda e: map( pnt2px, zip(e.x,e.y))     # whisker segment --> pixels
   def seg2pxs(e):

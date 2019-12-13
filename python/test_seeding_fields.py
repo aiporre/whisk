@@ -6,15 +6,18 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
+from __future__ import absolute_import
 from pylab import *
 from numpy import *
-import trace
+from . import trace
 import pdb
 #
 # LOAD FIELDS
 #
 from ui.genetiff import Reader
-from trace import *
+from .trace import *
+from functools import reduce
 #movie = Reader('../../data/S0.tif',adjuststipple=1)
 #movie = Reader('../../data/seq/whisker_data_0140.seq',adjuststipple=1)
 movie = Reader('../../data/JF8410_041808_001.tif',adjuststipple=1)
@@ -93,7 +96,7 @@ def trace_from_fields( image ):
 def trace_movie_from_fields( movie ):
   w = {}
   for i,im in enumerate(movie):
-    print "Frame %5d of %5d"%(i, len(movie))
+    print("Frame %5d of %5d"%(i, len(movie)))
     w[i] = dict([p for p in  enumerate(trace_from_fields( im )) ])
   return w
 

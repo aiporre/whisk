@@ -8,17 +8,20 @@ All rights reserved.
 Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
+from __future__ import print_function
+from __future__ import absolute_import
 import os,sys
 from ctypes import *
 from ctypes.util import find_library
 import numpy
 from numpy import zeros, double, fabs, ndarray, array
-import trace
-from trace import cWhisker_Seg
+from . import trace
+from .trace import cWhisker_Seg
 
 import warnings
 
 import pdb
+from functools import reduce
 
 dllpath = os.path.split(os.path.abspath(__file__))[0]
 if sys.platform == 'win32':
@@ -134,7 +137,7 @@ class MeasurementsTable(object):
     self._free_measurements(self._measurements)
 
   @staticmethod
-  def _fromWhiskerDict(wvd, (facex,facey), faceaxis ):
+  def _fromWhiskerDict(wvd, xxx_todo_changeme, faceaxis ):
     """
     Returns: LP_cMeasurements, int
       
@@ -142,6 +145,7 @@ class MeasurementsTable(object):
              when finished.  Potential memory leak.  For this reason, use the 
              MeasurementsTable constructor (__init__) instead.
     """
+    (facex,facey) = xxx_todo_changeme
     wv = trace.cWhisker_Seg.CastDictToArray(wvd)
     return ctraj.Whisker_Segments_Measure(wv,len(wv), facex, facey, faceaxis), len(wv)
   
@@ -210,7 +214,7 @@ class MeasurementsTable(object):
     for k,v in trajectories.iteritems():
       if not k in excludes:
         for s,t in v.iteritems():
-          print >> f, '%d,%d,%d'%(k,s,t)
+          print('%d,%d,%d'%(k,s,t), file=f)
     return self
 
   def load_trajectories(self,filename ):
@@ -655,8 +659,8 @@ def batch_make_measurements(sourcepath, ext = '*.seq', label = 'curated'):
   warnings.simplefilter("ignore")
   from glob import glob
   from ui.whiskerdata import load_trajectories
-  from trace import Load_Whiskers
-  import summary
+  from .trace import Load_Whiskers
+  from . import summary
   warnings.simplefilter("default")
 
   def get_summary_data( filename, whiskers, trajectories ):
@@ -673,8 +677,8 @@ def batch_make_measurements(sourcepath, ext = '*.seq', label = 'curated'):
     prefix = root + '[%s]'%label
     if not os.path.exists( prefix + '.measurements' ):
       t,tid = load_trajectories( prefix + '.trajectories' )
-      print prefix
-      print t.keys()
+      print(prefix)
+      print(t.keys())
       w = Load_Whiskers( prefix + '.whiskers' ) 
       data = get_summary_data( prefix + '.npy', w, t )
       MeasurementsTable( data ).update_velocities().save( prefix + '.measurements' )

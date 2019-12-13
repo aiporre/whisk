@@ -6,10 +6,13 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
-from tests import plot_whiskers
+from __future__ import print_function
+from __future__ import absolute_import
+from .tests import plot_whiskers
 from ui.whiskerdata.trace import Whisker_Seg
 from numpy import *
 import pdb
+from functools import reduce
 
 def load():
   from ui.whiskerdata import load_whiskers, load_trajectories
@@ -32,17 +35,17 @@ def check_bounds(wvd,shape):
     for i,w in wv.iteritems():
       for x,y,t,s in w:
         if x<0 or x>=shape[1] or y<0 or y>=shape[0]:
-          print "out of bounds"
+          print("out of bounds")
           pdb.set_trace()
         if not ( w.x.flags.contiguous and w.y.flags.contiguous ):
-          print "not contiguous"
+          print("not contiguous")
           pdb.set_trace()
   
 
 def fix(wvd,movie,scale=2, signal_per_pixel = 0, max_dist = 60, max_angle = 20.*pi/180.):
   shape = movie[0].shape
   for fid,wv in wvd.items():
-    print fid
+    print(fid)
     table = CollisionTable( wv, shape, scale )
     r = set( resolution( table, wv ) )
     for j,l in choose_gaps(movie[fid],r,signal_per_pixel,max_dist,max_angle):
@@ -210,7 +213,7 @@ def solve_polynomial_join( left, right, reverse = 0):
   rx = right.x[ 0]             ## right.x[nr] 
   lx = left.x[-1 ]             ## left.x[-nl] 
   L = hypot( rx-lx, ry-ly )    # Approximate dl/dt  
-  print "L:%g"%L
+  print("L:%g"%L)
   yv = matrix(   [[  ly                          ],   
                   [  ry                          ],   
                   [  dly * L                     ],    # dy/dt = dy/dl * dl/dt
@@ -329,7 +332,7 @@ def choose_gaps(im,wv, signal_per_pixel = 0.0, max_dist=60, max_angle = pi/4.):
         l = compute_join_score(im,px,py)
         if l < -signal_per_pixel:
           #plot_test(px,py)
-          print "\tScore: %g Theta: %g"%(l,jth*180/pi)
+          print("\tScore: %g Theta: %g"%(l,jth*180/pi))
           e = make_joining_whisker(px,py,d,b.thick[-1],b.scores[-1],a.thick[ 0],a.scores[ 0])
           yield (b,e,a),l
 
@@ -360,8 +363,10 @@ def gap_measures(im,wv):
       #  plot_join(px,py)
   return d,l,cx,cy
 
-def trace_overlap( (wa,i), (wb,j), thresh = 2.0 ):
+def trace_overlap(xxx_todo_changeme, xxx_todo_changeme1, thresh = 2.0 ):
   # DONE: does not assume that indexes run along same direction
+  (wa,i) = xxx_todo_changeme
+  (wb,j) = xxx_todo_changeme1
   def dist(ia,ib):
     a,b = wa[ia], wb[ib]
     return hypot( a[0] - b[0], a[1] - b[1] )
@@ -483,7 +488,7 @@ def trace_overlap( (wa,i), (wb,j), thresh = 2.0 ):
 
 def resolution(table, wvd):
   rest = set(wvd.values())
-  match = table.next()
+  match = next(table)
   while match:
     keep,discard = merge(match)
     if discard: 
@@ -493,7 +498,7 @@ def resolution(table, wvd):
         yield a
       for a,i in match:
         rest.discard(a)
-    match = table.next()
+    match = next(table)
   for a in rest:
     yield a
 
@@ -579,10 +584,10 @@ class CollisionTable(object):
         s.discard( (w,i) )
     
   def __iter__(self):
-    m = self.next()
+    m = next(self)
     while m:
       yield m
-      m = self.next()
+      m = next(self)
 
   def next(self):
     """ This changes the inverse table by removing hits.

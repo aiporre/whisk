@@ -6,6 +6,8 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
+from future.utils import raise_
 import numpy as np
 from scipy.integrate import quad
 import re
@@ -31,15 +33,15 @@ def helper_face_point(shape, directive):
     if len(m.groups())==2:
       return tuple(map(int,m.groups()))
     else:
-      raise Exception, 'Could not interpret directive: %s'%directive
+      raise_(Exception, 'Could not interpret directive: %s'%directive)
   else:
     try:
       return helpers[directive]()
     except KeyError:
-      print "Available directives"
+      print("Available directives")
       for k in helpers.iterkeys():
-        print '\t',k
-      raise Exception, 'Could not use supplied directive: %s'%directive
+        print('\t',k)
+      raise_(Exception, 'Could not use supplied directive: %s'%directive)
 
 def make_side_function(cx,cy):
   """ returns (follicle index, dx) """

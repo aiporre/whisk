@@ -15,9 +15,11 @@ All rights reserved.
 Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
+from __future__ import print_function
+from __future__ import absolute_import
 
-import scheduler
-from scheduler import LastOnlyScheduler
+from . import scheduler
+from .scheduler import LastOnlyScheduler
 import trace
 import traj
 from trace import Save_Whiskers
@@ -101,13 +103,13 @@ def __save_state(precursor_or_names, *args):
   #
   do_nothing = lambda *args: None  #this gets called for unrecognized extensions
   for extension,filename in names.iteritems():
-    print 'Saving ',extension,'...',
+    print('Saving ',extension,'...', end=' ')
     sys.stdout.flush()
     savers.get(extension,do_nothing)(filename,*args) 
-    print 'Done'
+    print('Done')
 
 def save_state( precursor_or_names, whiskers, trajectories, facehint ):
-  print "save state: "+str(precursor_or_names)
+  print("save state: "+str(precursor_or_names))
   __save_state(precursor_or_names,whiskers,trajectories, facehint)
 
 def load_state( precursor_or_names ):
@@ -158,9 +160,9 @@ def load_state( precursor_or_names ):
   
     
   def logload(t,v):
-    print "Loaded: ",t
+    print("Loaded: ",t)
     return v
-  print 'Loading...'
+  print('Loading...')
   objs = [logload(t,loaders[os.path.splitext(names[t])[1]](names[t])[0]) for t in order]
   objs.append(0) #append a legit trajectory id....assuming 0...this should probably get taken out later
   # dark magic - rewrite precursor_or_names with the names used...this will bias the save function to save
@@ -172,7 +174,7 @@ def load_measurements( name ):
   try:
     return [traj.MeasurementsTable(name).get_trajectories(),0]
   except IOError:
-    print "Couldn't open file. Creating: ", name
+    print("Couldn't open file. Creating: ", name)
     return {},0
 
 def save_measurements( name, *args ):
@@ -187,7 +189,7 @@ def load_whiskers( filename ):
       wid = w.values()[0].keys()[0]
     return w,wid      
   except:
-    print "Couldn't open file. Creating: ", filename
+    print("Couldn't open file. Creating: ", filename)
     return {},0
 
 def save_whiskers( filename, *args ):
@@ -198,7 +200,7 @@ def save_trajectories( filename, *args ):
   trajectories = args[1]
   for k,v in trajectories.iteritems():
     for s,t in v.iteritems():
-      print >> f, '%d,%d,%d'%(k,s,t)
+      print('%d,%d,%d'%(k,s,t), file=f)
 
 def load_trajectories( filename ):
   trajectories = {}
@@ -214,7 +216,7 @@ def load_trajectories( filename ):
 
     return trajectories, trajectories.keys()[0]
   except:
-    print "Couldn't open file. Creating: ", filename
+    print("Couldn't open file. Creating: ", filename)
     return {},0
 
 def load_bar_centers( filename ):

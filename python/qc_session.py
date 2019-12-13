@@ -11,7 +11,9 @@
     >>> legend(out.keys())
 
 """
-import traj
+from __future__ import print_function
+from __future__ import absolute_import
+from . import traj
 from numpy import *
 from pylab import *
 
@@ -54,7 +56,7 @@ def gen_trial_matrix(generator,iwhisker=0,ifeature=5):
 
   for i,n in enumerate(generator):
     try:
-      print "[%5d of %5d] %s"%(i,filecount,n)
+      print("[%5d of %5d] %s"%(i,filecount,n))
       table = traj.MeasurementsTable(n)    
       data = table.asarray()
 
@@ -82,7 +84,7 @@ def gen_trial_matrix2(generator,iwhisker=0,ifeatures=[5,6]):
 
   for i,n in enumerate(generator):
     try:
-      print "[%5d of %5d] %s"%(i,filecount,n)
+      print("[%5d of %5d] %s"%(i,filecount,n))
       table = traj.MeasurementsTable(n)    
       data = table.asarray()
 
@@ -147,13 +149,13 @@ class annotate_trials:
       for r,dirnames,filenames in os.walk(root):
         for filename in fnmatch.filter(filenames,'*.seq'):
           name = os.path.join(r,filename) 
-          if not self.data.has_key(name):
+          if name not in self.data:
             yield name
 
     self.iframe = iframe
     self.g = gen_names(root)
     try:
-      self.n = self.g.next()
+      self.n = next(self.g)
     except StopIteration:
       return
 
@@ -163,15 +165,15 @@ class annotate_trials:
     def totitle(name):
       return os.path.split(name)[-1]
     def onkeypress(event):
-      print totitle(self.n), event.key
+      print(totitle(self.n), event.key)
       self.data[self.n] = event.key
       if(self.default_filename):
         self.save(self.default_filename)
 
-      self.n = self.g.next()
-      print "Loading: "+totitle(self.n)
+      self.n = next(self.g)
+      print("Loading: "+totitle(self.n))
       movie = Reader(self.n,adjuststipple=True)
-      print "Showing"
+      print("Showing")
       clf()
       imshow(movie[self.iframe],interpolation='nearest')
       self.drawrefs()
@@ -304,7 +306,7 @@ def gen_trial_matrix_summary(trialtypes=None,sessions=None):
 
   row = 0;
   for i,(filename,code) in enumerate(zip(seq2measurements(gen_trials()),gen_trial_index())):
-    print "[%5d of %5d] %s"%(i,ntrials,filename)
+    print("[%5d of %5d] %s"%(i,ntrials,filename))
     try:
       data = traj.MeasurementsTable(filename).asarray();
       index[row,:] = code
@@ -381,7 +383,7 @@ def gen_trial_matrix_all_whiskers(n_whiskers=3,ifeatures=[5,6]):
   for kTrialType,vTrialType in out.iteritems():
     for kSession,vSession in vTrialType.iteritems():
       for filename in seq2measurements(vSession):
-        print "[%5d of %5d] %s"%(row,im.shape[1],filename)
+        print("[%5d of %5d] %s"%(row,im.shape[1],filename))
         try:
           data = traj.MeasurementsTable(filename).asarray();
           for iWhisker in xrange(n_whiskers):

@@ -7,11 +7,12 @@ All rights reserved.
 Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
+from __future__ import absolute_import
 from ctypes import *
 from ctypes.util import find_library
 import numpy
 from numpy import zeros
-from reader import IMovieReader
+from .reader import IMovieReader
 import os,sys
 
 dllpath = os.path.split(os.path.split(os.path.abspath(__file__))[0])[0]

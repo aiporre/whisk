@@ -9,11 +9,14 @@
   by rewriting.
 
 """
-import traj
+from __future__ import print_function
+from __future__ import absolute_import
+from . import traj
 from numpy import *
 from pylab import *
 import pdb
 import os
+from functools import reduce
 
 #ROOT = r"H:\DOM3" 
 ROOT = r"I:\data\DHO"
@@ -56,7 +59,7 @@ def backup_measurements(root,backupname):
   N = len(list(gen_names(root)))
   for i,e in enumerate(gen_names(root)):
     d = os.path.join(broot,subroot(root,e))
-    print "[%6d of %6d] %s"%(i,N,d)
+    print("[%6d of %6d] %s"%(i,N,d))
     ensure(d)
     shutil.copy( e,d )
 
@@ -154,14 +157,14 @@ def fix_filenames(meta,anm=None,date=None,fakeit=True):
       files = glob.glob(pattern)
       if len(files)!=1: # handle them errors, bro
         if len(files)==0:
-          print "Could not find candidate for missing file: "+fname
+          print("Could not find candidate for missing file: "+fname)
         else:
-          print "Multiple candidates found for missing file: "+fname
+          print("Multiple candidates found for missing file: "+fname)
           for f in files:
-            print "\t"+f
+            print("\t"+f)
         continue
       # done handling errors, get some buisness done
-      print "Move %s to %s"%(files[0],fname)
+      print("Move %s to %s"%(files[0],fname))
       if not fakeit:
         shutil.move(files[0],fname)
 
@@ -170,11 +173,11 @@ def fix_filenames(meta,anm=None,date=None,fakeit=True):
 
 
 def head(g):
-  return g.next()
+  return next(g)
 
 def countof_frames(fname):
   v = traj.MeasurementsTable(fname).asarray()[:,1].max() 
-  print fname, v
+  print(fname, v)
   return int(v)
 
 def update_meta(meta):
@@ -318,7 +321,7 @@ def plot_hist_matrix_over_time(meta,anm,day,from_ms,to_ms,every_ms,**kwargs):
 def all_anm_hist_matrix_over_time(meta,from_ms,to_ms,every_ms,**kwargs):
   results = {}
   for anm in meta.keys():
-    print anm
+    print(anm)
     ncols = len(range(from_ms,to_ms,every_ms))
     kwargs['min_ms'] = from_ms
     kwargs['max_ms'] = from_ms+every_ms
@@ -327,21 +330,21 @@ def all_anm_hist_matrix_over_time(meta,from_ms,to_ms,every_ms,**kwargs):
     
     hists = {}
     for day in [k for k in meta[anm].keys() if type(k) is datetime.date]:
-      print day,
+      print(day, end=' ')
       try:
         out = nan*zeros((nrows,ncols)) #cols are time, rows are feature, value is density
         for i,t in enumerate(xrange(from_ms,to_ms,every_ms)):
-          print '.',
+          print('.', end=' ')
           kwargs['min_ms'] = t
           kwargs['max_ms'] = t+every_ms
           tmp = hist_matrix(meta,anm,day,**kwargs)
           out[:,i] = tmp.mean(axis=0)
         hists[day] = out
       except:
-        print 'x',
+        print('x', end=' ')
         pass
       finally:
-        print 'Done'
+        print('Done')
     results[anm] = hists
   return results
 
@@ -392,7 +395,7 @@ def plot_mean_deflection_over_time(meta,anm,from_ms,to_ms,every_ms,**kwargs):
 def all_anm_mean_deflection_over_time(meta,from_ms,to_ms,every_ms,**kwargs):
   results = {}
   for anm in meta.keys():
-    print anm
+    print(anm)
     ncols = len(range(from_ms,to_ms,every_ms))
     kwargs['min_ms'] = from_ms
     kwargs['max_ms'] = from_ms+every_ms
@@ -402,10 +405,10 @@ def all_anm_mean_deflection_over_time(meta,from_ms,to_ms,every_ms,**kwargs):
           
     means = {}
     for day in [k for k in meta[anm].keys() if type(k) is datetime.date]:
-      print day,
+      print(day, end=' ')
       try:
         for i,t in enumerate(xrange(from_ms,to_ms,every_ms)):
-          print '.',
+          print('.', end=' ')
           kwargs['min_ms'] = t
           kwargs['max_ms'] = t+every_ms
           tmp = hist_matrix(meta,anm,day,**kwargs)          
@@ -415,7 +418,7 @@ def all_anm_mean_deflection_over_time(meta,from_ms,to_ms,every_ms,**kwargs):
       except:                
         pass
       finally:
-        print 'Done'      
+        print('Done')      
     results[anm] = means
   return results
 
@@ -470,7 +473,7 @@ def queries(meta):
   argmax = {'delta_angle':'','delta_curvature':''}
 
   for name,table in itertrials(meta):
-    print name    
+    print(name)    
     for trajectory in iteridents(table):
       ts  = times(trajectory)[1:]
       dts = delta_times(trajectory)

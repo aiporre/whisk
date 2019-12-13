@@ -21,14 +21,17 @@ Date: 2009-05-26
 Copyright (c) 2009 HHMI. Free downloads and distribution are allowed as long as
 proper credit is given to the author.  All other rights reserved.
 """
+from __future__ import absolute_import
+from future.utils import raise_
 import warnings
+from functools import reduce
 warnings.simplefilter("ignore",UserWarning)
 import optparse
 import os
 import numpy
-import trace
-import traj
-import summary
+from . import trace
+from . import traj
+from . import summary
 from ui.whiskerdata import load_trajectories
 warnings.simplefilter("default",UserWarning)
 
@@ -77,9 +80,9 @@ if __name__ == '__main__':
     parser.error( "Expected 1 or 2 source files as arguments but recieved %d."%len(args) )
   if not os.path.exists(os.path.split(dst)[0]): 
     if os.path.split(dst)[0]!='':
-      raise IOError, "Could not find destination path %s"%os.path.split(dst)[0]
+      raise_(IOError, "Could not find destination path %s"%os.path.split(dst)[0])
   if not all( map( os.path.exists, args )):
-    raise IOError, "Could not find one or more input source files."
+    raise IOError("Could not find one or more input source files.")
 
 
   if all(map( lambda f: os.path.splitext(f)[-1] in ['.trajectories','.whiskers'], args )):
@@ -102,7 +105,7 @@ if __name__ == '__main__':
     try:
       data = traj.MeasurementsTable( sources['.measurements'] ).asarray()
     except KeyError:
-      raise UserException, "A .measurements file must be provided as one of the source files."
+      raise UserException("A .measurements file must be provided as one of the source files.")
 
     try:
       t,tid = load_trajectories( sources['.trajectories'] )

@@ -6,6 +6,7 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
 from pylab import *
 from numpy import *
 import traceback,sys
@@ -87,13 +88,13 @@ def doone_w_traj(movie,w,t,fid,fps):
 
 def doall_w_traj(movie,wvd,t,frames,dest="render/seq_%04d.png",fps=1000):
   for i,fid in enumerate(frames):
-    print fid
+    print(fid)
     doone_w_traj(movie,wvd,t,fid,fps)
     savefig(dest%fid,dpi=600,facecolor = (0,0,0),bbox_inches="tight",pad_inches=0 )
 
 def doall(movie,wvd,frames,dest="render/render_%04d.png",fps=1000):
   for fid in frames:
-    print fid
+    print(fid)
     doone(movie[fid],wvd,fid,fps)
     savefig(dest%fid,dpi=600,facecolor = (0,0,0),bbox_inches='tight',pad_inches=0)
 

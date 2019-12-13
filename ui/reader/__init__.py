@@ -7,12 +7,14 @@ All rights reserved.
 Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
+from __future__ import absolute_import
+from future.utils import raise_
 import warnings
 warnings.simplefilter( "ignore", UserWarning )
-from seq import SeqReader
-from tiff import TiffReader
-from ffmpeg import FFMPEGReader
-from reader import TransposedReader, AdjustStippledGainReader
+from .seq import SeqReader
+from .tiff import TiffReader
+from .ffmpeg import FFMPEGReader
+from .reader import TransposedReader, AdjustStippledGainReader
 import os
 warnings.simplefilter( "default", UserWarning )
 
@@ -36,7 +38,7 @@ def Reader(filename, transpose = False, adjuststipple = False):
   elif is_ffmpeg_ext(ext):
     ret = FFMPEGReader( filename )
   else:
-    raise Exception,"File type (%s) not supported."%ext
+    raise_(Exception,"File type (%s) not supported."%ext)
   if adjuststipple:
     ret = AdjustStippledGainReader( ret )
   if transpose:

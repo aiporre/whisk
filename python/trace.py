@@ -18,6 +18,7 @@ All rights reserved.
 Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
+from __future__ import print_function
 import sys,os
 from ctypes import *
 from ctypes.util import find_library
@@ -352,7 +353,7 @@ def Debug_Load_Whiskers(filename):
       This responds to .time, .x, .y, and .id
   """
   if not os.path.exists(filename):
-    raise IOError, "File not found."
+    raise IOError("File not found.")
   nwhiskers = c_int(0)
   wv = cWhisk.Load_Whiskers( filename, None, byref(nwhiskers) );
   return wv, nwhiskers.value
@@ -386,7 +387,7 @@ def Load_Whiskers( filename ):
   called once per application instance.
   """
   if not os.path.exists(filename):
-    raise IOError, "File not found."
+    raise IOError("File not found.")
   nwhiskers = c_int(0)
   wv = cWhisk.Load_Whiskers( filename, None, byref(nwhiskers) );
   # organize into dictionary for ui.py {frameid}{segid}
@@ -473,7 +474,7 @@ try:
                               costs.T.ctypes.data_as( POINTER(c_double) ),
                               costs.shape[1],
                               costs.shape[0] )
-    print assignment
+    print(assignment)
     map = {}
     for i,j in enumerate(assignment):
       if j != -1:
@@ -495,7 +496,7 @@ try:
       for j,bi in enumerate(b):
         d[i,j] = ((ai-bi)**2).sum()
     assignment,cost = bipartite_matching( d )
-    print "Matching cost: ", cost.value
+    print("Matching cost: ", cost.value)
     plot(a[:,0],a[:,1],'o')
     plot(b[:,0],b[:,1],'s')
     for i,j in assignment.iteritems():
@@ -604,7 +605,8 @@ cWhisk.compute_seed_from_point_field_on_grid.argtypes = [
   POINTER( cImage ),    # output - slopes
   POINTER( cImage )]    # output - stats
 
-def get_response( image, (x,y) ):
+def get_response( image, xxx_todo_changeme ):
+  (x,y) = xxx_todo_changeme
   p = c_int( int(x) + int(y)*image.shape[1] )
   nx,ny,nz = c_int(),c_int(),c_int()
   #x is the axis that changes fastest with index, z is the slowest
@@ -652,7 +654,8 @@ def compute_object_map( image ):
   cim = cImage.fromarray( image )
   return cWhisk.get_objectmap( byref(cim) ).contents
 
-def compute_seed( image, (x,y), maxr = 4 ):
+def compute_seed( image, xxx_todo_changeme1, maxr = 4 ):
+  (x,y) = xxx_todo_changeme1
   cim = cImage.fromarray( image )
   p = c_int( int(x) + int(y)*image.shape[1] )
   pcseed = cWhisk.compute_seed_from_point( cim, p, c_int(maxr) ); 
@@ -661,7 +664,8 @@ def compute_seed( image, (x,y), maxr = 4 ):
     return pcseed.contents
   return None
 
-def compute_seed_ex( image, (x,y), maxr = 4 ):
+def compute_seed_ex( image, xxx_todo_changeme2, maxr = 4 ):
+  (x,y) = xxx_todo_changeme2
   m = c_float()
   stat = c_float()
   cim = cImage.fromarray( image )

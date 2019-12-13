@@ -43,7 +43,7 @@ def length_v_score_plot(target,source,env):
 def dfs_consume_tuples(g,cur):
   while isinstance(cur,tuple):
     yield cur
-    cur = g.next()
+    cur = next(g)
   def rest():
     yield cur
     for e in g:

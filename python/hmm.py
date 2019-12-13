@@ -6,6 +6,7 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import absolute_import
 #!/usr/bin/env python
 # TODO: Refactor so the names make more sense given their jobs
 #       e.g. 'train' should be something else
@@ -13,10 +14,10 @@ to the author. All other rights reserved.
 #            `data` to feature_table
 #           `feature` should be measurement or some such
 
-import features
+from . import features
 from numpy import zeros,array,histogram,linspace, float32, float64, log2, floor, diff, int32, ones, argmax
 from numpy import maximum
-import trace
+from . import trace
 import pdb
 
 class EmmissionDistributions(object):

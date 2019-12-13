@@ -21,12 +21,14 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed as long as 
 credit is given to the author.  All other rights reserved.
 
 """
+from __future__ import print_function
 from ui.whiskerdata.trace import Whisker_Seg
 from ui.whiskerdata import save_whiskers
 from numpy import *
 from warnings import warn
 import os
 import pdb
+from functools import reduce
 
 def load(moviename, whiskersname):
   from ui.whiskerdata import load_whiskers, load_trajectories
@@ -48,7 +50,7 @@ def fix(wvd,movie,scale=2, signal_per_pixel = 0, max_dist = 60, max_angle = 20.*
   shape = movie[0].shape
   nframes = max( wvd.keys() )
   for fid,wv in wvd.items():
-    print "Frame %5d of %5d"%(fid,nframes)
+    print("Frame %5d of %5d"%(fid,nframes))
     wv = fix_overlaps_in_frame( wv, shape, scale )
     wvd[fid] = wv
 #   for j,l in choose_gaps(movie[fid],r,signal_per_pixel,max_dist,max_angle):
@@ -429,8 +431,10 @@ def gap_measures(im,wv):
       #  plot_join(px,py)
   return {'dist':d,'score':s,'path length':l,'curvature x':cx,'curvature y':cy,'total curvature':c}
 
-def trace_overlap( (wa,i), (wb,j), thresh = 2.0 ):
+def trace_overlap(xxx_todo_changeme, xxx_todo_changeme1, thresh = 2.0 ):
   # DONE: does not assume that indexes run along same direction
+  (wa,i) = xxx_todo_changeme
+  (wb,j) = xxx_todo_changeme1
   def dist(ia,ib):
     a,b = wa[ia], wb[ib]
     return hypot( a[0] - b[0], a[1] - b[1] )
@@ -552,7 +556,7 @@ def trace_overlap( (wa,i), (wb,j), thresh = 2.0 ):
 
 def resolution(table, wvd):
   rest = set(wvd.values())
-  match = table.next()
+  match = next(table)
   while match:
     keep,discard = merge(match)
     if discard: 
@@ -562,7 +566,7 @@ def resolution(table, wvd):
         yield a
       for a,i in match:
         rest.discard(a)
-    match = table.next()
+    match = next(table)
   for a in rest:
     yield a
 
@@ -650,10 +654,10 @@ class CollisionTable(object):
         s.discard( (w,i) )
     
   def __iter__(self):
-    m = self.next()
+    m = next(self)
     while m:
       yield m
-      m = self.next()
+      m = next(self)
 
   def next(self):
     """ This changes the inverse table by removing hits.
@@ -770,7 +774,7 @@ if 1:
       dstname = root + gettail(options.destlabel,'.whiskers')  
 
 
-    print "Loading..."
+    print("Loading...")
     w,movie = load(moviename,srcname)
     # need to remove srclabel and destlabel
     options.__dict__.pop('srclabel')

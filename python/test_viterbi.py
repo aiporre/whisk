@@ -6,6 +6,8 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
+from __future__ import absolute_import
 from numpy import *
 """
 /*** Problem 2 ***********************************************************/
@@ -49,8 +51,8 @@ sequence = [ DRY,
              SOGGY ]; ## should give sunny -> rainy -> rainy -> cloudy -> rainy -> rainy with vprob 2.5754047e-5
 expected = 2.5754047e-5;
 
-from trace import viterbi_log2
+from .trace import viterbi_log2
 t,p,labels = viterbi_log2( sequence, log2(sprob), log2(tprob), log2(eprob), do_checks = True )
-print 2**t,2**p
+print(2**t,2**p)
 for e in labels:
-  print states[e]
+  print(states[e])

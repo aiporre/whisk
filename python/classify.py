@@ -14,14 +14,16 @@ Date: 2009-05-26
 Copyright (c) 2009 HHMI. Free downloads and distribution are allowed as long as proper
 credit is given to the author.  All other rights reserved.
 """
+from __future__ import absolute_import
+from future.utils import raise_
 import optparse
 import os
 import warnings
 
 warnings.simplefilter("ignore",UserWarning)
-import trace
-import summary
-import traj
+from . import trace
+from . import summary
+from . import traj
 from ui.whiskerdata import save_trajectories
 warnings.simplefilter("default",UserWarning)
 
@@ -33,7 +35,7 @@ if __name__ == '__main__':
   src, dst = args
 
   if not os.path.exists(os.path.split(dst)[0]): # check path, do this before doing long calculation
-    raise IOError, "Could not find destination file %s"%dst
+    raise_(IOError, "Could not find destination file %s"%dst)
 
   #
   # Get data from source
@@ -45,7 +47,7 @@ if __name__ == '__main__':
   elif ext == '.measurements':
     data = traj.MeasurementsTable(src).asarray()
   else:
-    raise IOError, "Source file extension not recognized.  Got: %s"%ext
+    raise_(IOError, "Source file extension not recognized.  Got: %s"%ext)
 
   traj = summary._simpletraj(data)
 

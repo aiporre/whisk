@@ -1,4 +1,6 @@
-import traj
+from __future__ import print_function
+from __future__ import absolute_import
+from . import traj
 from pylab import *
 
 def heuristic_precision(table):
@@ -53,7 +55,7 @@ def proc(root):
   for i,n in enumerate(gen_names(root)):
     if 1: #i < 5:
       try:
-        print "[%5d of %5d] %s"%(i,filecount,n)
+        print("[%5d of %5d] %s"%(i,filecount,n))
         table = traj.MeasurementsTable(n)
         recall += heuristic_recall(table)
         precision += heuristic_precision(table)

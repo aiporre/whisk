@@ -6,9 +6,12 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
+from __future__ import absolute_import
 from numpy import zeros, hypot
-from trace import Whisker_Seg
+from .trace import Whisker_Seg
 import pdb
+from functools import reduce
 
 def load():
   from ui.whiskerdata import load_whiskers, load_trajectories
@@ -24,7 +27,7 @@ def load():
 
 def merge_all( whiskers, shape, scale = 2 ):
   for fid,wvd in whiskers.iteritems():
-    print fid
+    print(fid)
     wv = merge_frame( wvd, shape, scale ).whiskers()
     wvd.clear()
     wvd.update( [ e for e in enumerate(wv) ] )
@@ -34,11 +37,11 @@ def merge_frame( wvd, shape, scale = 2 ):
   r     = Resolution(wvd.values())
   #r     = Resolution()
   
-  m = table.next()
+  m = next(table)
   while m:
     o = r.add(m, lambda e: len(e)<5 )
     table.update(o)
-    m = table.next()
+    m = next(table)
 
   return r
 
@@ -47,9 +50,11 @@ def breakout( w, bnd ):
   middle,right = rest.split(bnd[1]-bnd[0])
   return left, middle, right
 
-def trace_overlap( (wa,i), (wb,j), thresh = 2.0 ):
+def trace_overlap(xxx_todo_changeme, xxx_todo_changeme1, thresh = 2.0 ):
   # assumes that indexes run along same direction (i.e. x is monitonically
   # increasing along index )
+  (wa,i) = xxx_todo_changeme
+  (wb,j) = xxx_todo_changeme1
   def dist(ia,ib):
     a,b = wa[ia], wb[ib]
     return hypot( a[0] - b[0], a[1] - b[1] )
@@ -161,7 +166,7 @@ class Resolution(object):
   def update( self, newpaths, owner, stubs ):
     if 0:
       from pylab import plot, cla, show
-      from tests import plot_whiskers
+      from .tests import plot_whiskers
       cla()
       plot(owner.x,owner.y,'k',linewidth=3)
       plot_whiskers([e for e in p if e],marker='x')
@@ -283,7 +288,7 @@ class Resolution(object):
           pset.discard(p)
           
     if 0:
-      from tests import plot_whiskers
+      from .tests import plot_whiskers
       from pylab import cm, clf, show
       cmap = lambda i: cm.spectral( i/float(len(pset)) )
       for i,p in enumerate(pset):
@@ -293,7 +298,7 @@ class Resolution(object):
     return pset,ownership
 
   def plot(self, index = None):
-    from tests import plot_whiskers
+    from .tests import plot_whiskers
     from pylab import cm
     cmap = lambda i: cm.spectral( i/float(len(self._paths)) )
     if index is None:

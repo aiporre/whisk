@@ -35,6 +35,7 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
 from multiprocessing import freeze_support
 from multiprocessing import Pool
 import subprocess
@@ -56,15 +57,15 @@ else:
   _launcher = []
 
 def run(args):
-  print "Got job: "+' '.join(args)
+  print("Got job: "+' '.join(args))
   #print args
   #print "\tCWD: "+os.getcwd()
   #print
 
   try:
     retcode = subprocess.call(args, env = os.environ)
-  except Exception,e:
-    print e
+  except Exception as e:
+    print(e)
     return args, 1 # return failure
   return args,retcode
 
@@ -99,7 +100,7 @@ def doit(path,
   try:
     result = P.map(run, jobs)
   except KeyboardInterrupt:
-    print "Control-C Pressed.  Aborting."
+    print("Control-C Pressed.  Aborting.")
     P.terminate()
     return
 
@@ -113,11 +114,11 @@ def doit(path,
   if jobs:
     for args,code in result:
       if code == 0:
-        print args[len(_launcher)+1].rjust(maxlen+1), "[ ] Success"
+        print(args[len(_launcher)+1].rjust(maxlen+1), "[ ] Success")
       else:
-        print args[len(_launcher)+1].rjust(maxlen+1), "[X] FAILED"
+        print(args[len(_launcher)+1].rjust(maxlen+1), "[X] FAILED")
     elapsed = _timer() - t
-    print "Processed %d jobs in a total of %5.3f seconds (%5.3f sec/job)"%(len(jobs),elapsed,elapsed/float(len(jobs)))
+    print("Processed %d jobs in a total of %5.3f seconds (%5.3f sec/job)"%(len(jobs),elapsed,elapsed/float(len(jobs))))
 
 if __name__ == '__main__':
   freeze_support()

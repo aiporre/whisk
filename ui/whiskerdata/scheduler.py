@@ -1,3 +1,4 @@
+from __future__ import print_function
 from threading import Thread, Event
 import traceback, sys
 
@@ -26,11 +27,11 @@ class LastOnlyScheduler(Thread):
         self._executed += 1 
     except:
       title = '---'+str(self.__class__())+100*'-' 
-      print
-      print title[:80]
+      print()
+      print(title[:80])
       traceback.print_exc(file=sys.stderr)
-      print 80*'-'
-      print
+      print(80*'-')
+      print()
 
   def pushjob( self, job ):
     self._waiting_job = job
@@ -57,14 +58,14 @@ class TestLastOnlyScheduler(unittest.TestCase):
   def testLastOnlySchedulerAddOne(self):
     def f(name, x):
       for el in x:
-        print '%s: %d'%(name, el)
+        print('%s: %d'%(name, el))
 
     self.scheduler.pushjob( lambda: f('test add one job', range(10) ) )
   
   def testLastOnlySchedulerAddTen(self):
     def f(name, x):
       for el in x:
-        print '%s: %d'%(name, el)
+        print('%s: %d'%(name, el))
         time.sleep(0.1)
 
     for i in range(10):
@@ -74,7 +75,7 @@ class TestLastOnlyScheduler(unittest.TestCase):
   def testLastOnlySchedulerExceptionHandling(self):
     def f(name, x):
       for el in x:
-        print '%s: %d'%(name, el)
+        print('%s: %d'%(name, el))
         if (el+1)%5 == 0:
           raise Exception
         time.sleep(0.1)

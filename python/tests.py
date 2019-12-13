@@ -6,6 +6,7 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed for any
 non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
+from __future__ import print_function
 from pylab import *
 import pdb
 
@@ -353,7 +354,7 @@ def demo_builders( whiskers, frames ):
   mb = ModelBuilder( whiskers[frames[0]] )
   tb = TrajectoryBuilder( whiskers, frames[0] )
   for f in frames[1:]:
-    print f
+    print(f)
     m = mb.align( whiskers[f] )
     mb.update(whiskers[f], m)
     tb.update(f, m)

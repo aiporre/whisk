@@ -33,13 +33,15 @@ Date: 2009-05-26
 Copyright (c) 2009 HHMI. Free downloads and distribution are allowed as long as proper
 credit is given to the author.  All other rights reserved.
 """
+from __future__ import print_function
+from __future__ import absolute_import
 from numpy import *
 import numpy
 if __name__=='__main__':
   import matplotlib
   matplotlib.use('Agg')
 from pylab import *
-from features import *
+from .features import *
 import os
 import pdb
 import warnings
@@ -232,13 +234,13 @@ def render_identity_differences( movie, wA, tableA, wB, tableB, destpath ):
   aspect = shape[1]/float(shape[0]) # width / height
   figure(figsize = (9*aspect*(2.0/3.0),9))
   for i,fid in enumerate(frames):
-    print '[%5d of %5d]'%(i,len(frames))
+    print('[%5d of %5d]'%(i,len(frames)))
     do(fid)
   
 
 def render_classes(path,movie,wvd,datadict):
   for iframe in range(len(movie)):
-    print "%4d of %d"%(iframe, len(movie))
+    print("%4d of %d"%(iframe, len(movie)))
     plot_frame_by_class(movie,wvd,datadict,iframe)
     savefig(os.path.join(path,"render%04d.png"%iframe))
 
@@ -365,11 +367,11 @@ def plot_whiskers_by_trajectory(movie, wvd, traj, iframe):
 
 def _render_trajectories_single_frame( path, movie, wvd, traj, iframe ):
   try:
-    print "%4d of %d"%(iframe, len(movie))
+    print("%4d of %d"%(iframe, len(movie)))
     plot_whiskers_by_trajectory(movie,wvd,traj,iframe)
     savefig(os.path.join(path,"render%04d.png"%iframe))
-  except Exception, e:
-    print e
+  except Exception as e:
+    print(e)
 
 def render_trajectories(path,movie,wvd,traj):
   for iframe in range(len(movie)):
@@ -624,7 +626,7 @@ def plot_distributions_by_trajectory_nodata(w,traj,cmap = cm.jet):
   ylabel('Density')
 
 def render_summary_to_file(whiskername,figurename):
-  from trace import Load_Whiskers
+  from .trace import Load_Whiskers
   assert( os.path.exists(whiskername) )
   w = Load_Whiskers(whiskername)
   traj,data = autotraj(w)
@@ -637,7 +639,7 @@ def render_summary_to_file(whiskername,figurename):
 
 if 1:
   import optparse
-  from traj import MeasurementsTable
+  from .traj import MeasurementsTable
 
   if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "Usage: %prog [options] source dest")
