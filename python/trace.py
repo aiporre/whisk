@@ -19,6 +19,12 @@ Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
 from __future__ import print_function
+from __future__ import division
+from builtins import str
+from builtins import map
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import sys,os
 from ctypes import *
 from ctypes.util import find_library
@@ -62,7 +68,7 @@ class cContour(Structure):                       #typedef struct
     a = zeros( (self.length,2) )
     for i in range(self.length):
       a[i,0] = self.tour[i]%self.width
-      a[i,1] = self.tour[i]/self.width
+      a[i,1] = old_div(self.tour[i],self.width)
     return a
 
   def plot(self,*args,**kwargs):
@@ -79,14 +85,14 @@ class cObject_Map(Structure):
               ( "objects",      POINTER(POINTER( cContour ))) ]
 
   def plot(self,*args,**kwargs):
-    for i in xrange( self.num_objects ):
+    for i in range( self.num_objects ):
       self.objects[i].contents.plot(*args,**kwargs)
 
   def plot_with_seeds( self, image, *args, **kwargs ):
     from pylab import imshow, cm, axis, subplots_adjust, show
     imshow( image, cmap = cm.gray, hold = 0, interpolation = 'nearest' )
     self.plot( *args, **kwargs )
-    for i in xrange(self.num_objects):
+    for i in range(self.num_objects):
       sds = find_seeds( self.objects[i], image )
       if sds:
         sds.plot( linewidths = (1,), 
@@ -99,7 +105,7 @@ class cObject_Map(Structure):
     return gcf()
 
   def draw(self, surface, color, scale, drawfunc ):
-    for i in xrange( self.num_objects ):
+    for i in range( self.num_objects ):
       self.objects[i].contents.draw(surface,color,scale,drawfunc)
 
 class cWhisker_Seg_Old(Structure):                 #typedef struct      
@@ -157,17 +163,17 @@ class cWhisker_Seg(Structure):                      #typedef struct
     <trace.cWhisker_Seg object at 0x03DACC60>
     """
     #first count the number of segments
-    nseg = sum( map(len, wvd.values()) )
+    nseg = sum( map(len, list(wvd.values())) )
     
     #create the constructor
     type_wv = cWhisker_Seg * nseg;
     
     #alloc and fill the array
     def itersegs(wvd):
-      for v in wvd.itervalues():
-        for w in v.itervalues():
+      for v in wvd.values():
+        for w in v.values():
           yield w
-    wv = type_wv( *map(cWhisker_Seg.CastFromWhiskerSeg,list(itersegs(wvd))) )
+    wv = type_wv( *list(map(cWhisker_Seg.CastFromWhiskerSeg,list(itersegs(wvd)))) )
     
     return wv
 
@@ -191,7 +197,7 @@ class cSeed(Structure):
                 "cSeed",
                 self.xpnt,
                 self.ypnt,
-                arctan2(self.ydir, self.xdir)*180/pi)
+                old_div(arctan2(self.ydir, self.xdir)*180,pi))
 
 class cSeedVector(Structure):                  # typedef struct     
   _fields_ = [('nseeds', c_int            ),   #   { int   nseeds;  
@@ -199,7 +205,7 @@ class cSeedVector(Structure):                  # typedef struct
                                                #   } Seed_Vector;   
   def asarray(self):
     a = zeros(( self.nseeds, 4))
-    for i in xrange( self.nseeds ):
+    for i in range( self.nseeds ):
       a[i] = self.seeds[i].asarray()
     return a
 
@@ -256,7 +262,7 @@ class Whisker_Seg(object):
       self.scores = zeros( source.len, dtype=float32 )
       self.thick  = zeros( source.len, dtype=float32 )
 
-      for i in xrange( source.len ):
+      for i in range( source.len ):
         self.x[i]      = source.x[i]
         self.y[i]      = source.y[i]
         self.thick[i]  = source.thick[i]
@@ -392,10 +398,10 @@ def Load_Whiskers( filename ):
   wv = cWhisk.Load_Whiskers( filename, None, byref(nwhiskers) );
   # organize into dictionary for ui.py {frameid}{segid}
   whiskers = {}
-  for idx in xrange( nwhiskers.value ):
+  for idx in range( nwhiskers.value ):
     w = wv[idx]
     whiskers[ w.time ] = {}
-  for idx in xrange( nwhiskers.value ):
+  for idx in range( nwhiskers.value ):
     w = Whisker_Seg(wv[idx])
     whiskers[ w.time ][ w.id ] = w;
   cWhisk.Free_Whisker_Seg_Vec( wv, nwhiskers )
@@ -404,14 +410,14 @@ def Load_Whiskers( filename ):
 def Save_Whiskers( filename, whiskers ):
   #count the whiskers
   n = 0
-  for v in whiskers.itervalues():
+  for v in whiskers.values():
     n += len(v)
   #alloc the c whisker array
   wv = (cWhisker_Seg * n)() 
   #copy into c whisker array
   i = 0
-  for fid,v in whiskers.iteritems():
-    for wid,t in v.iteritems():
+  for fid,v in whiskers.items():
+    for wid,t in v.items():
       if not t:
         continue;
       wv[i].id   = wid
@@ -499,7 +505,7 @@ try:
     print("Matching cost: ", cost.value)
     plot(a[:,0],a[:,1],'o')
     plot(b[:,0],b[:,1],'s')
-    for i,j in assignment.iteritems():
+    for i,j in assignment.items():
       plot([ a[i,0], b[j,0] ], [ a[i,1], b[j,1] ],'k--')
     return assignment
 
@@ -707,8 +713,8 @@ def compute_seed_fields_windowed( image,  maxr = 4, maxiter = 4, window = (0.4,0
                                                  chist, cslopes, cstats )
 
   mask = hist>0
-  stats[mask]  = stats [mask]/hist[mask]
-  slopes[mask] = slopes[mask]/hist[mask]
+  stats[mask]  = old_div(stats [mask],hist[mask])
+  slopes[mask] = old_div(slopes[mask],hist[mask])
   return hist, slopes, stats
 
 def compute_seed_fields_windowed_on_objects( image,  maxr = 4, maxiter=1, window = (0.0,0.0) ):
@@ -721,15 +727,15 @@ def compute_seed_fields_windowed_on_objects( image,  maxr = 4, maxiter=1, window
   cstats  = cImage.fromarray(stats)
 
   objs = cWhisk.get_objectmap( byref(cim) ).contents
-  for i in xrange( objs.num_objects ):
+  for i in range( objs.num_objects ):
     ptrace = objs.objects[i]
     cWhisk.compute_seed_from_point_field_windowed_on_contour( cim, ptrace, 
                                                               c_int(maxr), c_int(maxiter),
                                                               window[0], window[1], 
                                                               chist, cslopes, cstats )
   mask = hist>0
-  stats[mask]  = stats [mask]/hist[mask]
-  slopes[mask] = slopes[mask]/hist[mask]
+  stats[mask]  = old_div(stats [mask],hist[mask])
+  slopes[mask] = old_div(slopes[mask],hist[mask])
   return hist, slopes, stats
 
 def compute_seed_from_point_field_on_grid(image, spacing=8, maxr=4, maxiter=1, window=(0.0,0.0) ):
@@ -743,8 +749,8 @@ def compute_seed_from_point_field_on_grid(image, spacing=8, maxr=4, maxiter=1, w
   cWhisk.compute_seed_from_point_field_on_grid( cim, c_int(spacing), c_int(maxr), c_int(maxiter), window[0], window[1],
                                                 chist, cslopes, cstats )
   mask = hist>0
-  stats[mask]  = stats [mask]/hist[mask]
-  slopes[mask] = slopes[mask]/hist[mask]
+  stats[mask]  = old_div(stats [mask],hist[mask])
+  slopes[mask] = old_div(slopes[mask],hist[mask])
   return hist, slopes, stats
 
 def plot_seeds_from_seeding_fields( image, fields = compute_seed_fields_windowed_on_objects, color='w' ):
@@ -798,7 +804,7 @@ def find_segments( image, iframe=0):
   cim = cImage.fromarray(image)
   n = c_int()
   cwv = cWhisk.find_segments( iframe, byref(cim), None, byref(n) )
-  wv = [ Whisker_Seg( cwv[i] ) for i in xrange( n.value ) ] # copy into friendlier container
+  wv = [ Whisker_Seg( cwv[i] ) for i in range( n.value ) ] # copy into friendlier container
   cWhisk.Free_Whisker_Seg_Vec( cwv, n )                     # free
   return wv
 
@@ -817,7 +823,7 @@ class cViterbiResult(Structure):
                ( "sequence" , POINTER( c_int )   )]   ## Most likely state sequence 
   def asarray(self): # this is a copy
     s = zeros( self.n, dtype = int32 )
-    for i in xrange( self.n ):
+    for i in range( self.n ):
       s[i] = self.sequence[i]
     return s
   def get(self):

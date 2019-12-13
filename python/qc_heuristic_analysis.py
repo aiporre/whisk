@@ -1,5 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import map
 from . import traj
 from pylab import *
 
@@ -28,10 +29,10 @@ def training_set_fraction(table):
       lengths[r[1]] = f
     return lengths
   length,estn = table.est_length_threshold();
-  count = lambda v: sum(map(lambda x: x>length,v))
+  count = lambda v: sum([x>length for x in v])
   isok = lambda v: count(v)==estn
   lengths = frame_by_length(table)
-  nok = sum(map(isok,lengths.values()))
+  nok = sum(map(isok,list(lengths.values())))
   return nok/float(len(lengths))
 
 def proc(root):

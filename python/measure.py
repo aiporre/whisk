@@ -22,6 +22,7 @@ Copyright (c) 2009 HHMI. Free downloads and distribution are allowed as long as
 proper credit is given to the author.  All other rights reserved.
 """
 from __future__ import absolute_import
+from builtins import map
 from future.utils import raise_
 import warnings
 from functools import reduce
@@ -36,7 +37,7 @@ from ui.whiskerdata import load_trajectories
 warnings.simplefilter("default",UserWarning)
 
 def ext_cmp(*args):
-  return reduce( cmp, map( lambda x: os.path.splitext(x)[-1], args ) )
+  return reduce( cmp, [os.path.splitext(x)[-1] for x in args] )
 
 def _fmt(s):
   import re
@@ -85,7 +86,7 @@ if __name__ == '__main__':
     raise IOError("Could not find one or more input source files.")
 
 
-  if all(map( lambda f: os.path.splitext(f)[-1] in ['.trajectories','.whiskers'], args )):
+  if all([os.path.splitext(f)[-1] in ['.trajectories','.whiskers'] for f in args]):
     if len(args)==1:
       src = args[0]
       tfile = None
@@ -98,8 +99,8 @@ if __name__ == '__main__':
       t,tid = load_trajectories( tfile )
       summary.commit_traj_to_data_table( t, data ) 
     
-  elif all(map( lambda f: os.path.splitext(f)[-1] in ['.trajectories','.measurements'], args )):  
-    sources = dict( map( lambda f: (os.path.splitext(f)[-1], f), args ) )
+  elif all([os.path.splitext(f)[-1] in ['.trajectories','.measurements'] for f in args]):  
+    sources = dict( [(os.path.splitext(f)[-1], f) for f in args] )
 
     
     try:

@@ -1,4 +1,6 @@
 from __future__ import print_function
+from builtins import str
+from builtins import range
 from threading import Thread, Event
 import traceback, sys
 
@@ -60,7 +62,7 @@ class TestLastOnlyScheduler(unittest.TestCase):
       for el in x:
         print('%s: %d'%(name, el))
 
-    self.scheduler.pushjob( lambda: f('test add one job', range(10) ) )
+    self.scheduler.pushjob( lambda: f('test add one job', list(range(10)) ) )
   
   def testLastOnlySchedulerAddTen(self):
     def f(name, x):
@@ -69,7 +71,7 @@ class TestLastOnlyScheduler(unittest.TestCase):
         time.sleep(0.1)
 
     for i in range(10):
-      self.scheduler.pushjob( lambda: f('job (%d)'%i, range(10) ) )
+      self.scheduler.pushjob( lambda: f('job (%d)'%i, list(range(10)) ) )
       time.sleep(0.1)
 
   def testLastOnlySchedulerExceptionHandling(self):
@@ -81,7 +83,7 @@ class TestLastOnlyScheduler(unittest.TestCase):
         time.sleep(0.1)
     for i in range(10):
       self.scheduler.pushjob( 
-        lambda: f('testLastOnlySchedulerExceptionHandling  (%d)'%i, range(10) ) 
+        lambda: f('testLastOnlySchedulerExceptionHandling  (%d)'%i, list(range(10)) ) 
         )
       time.sleep(0.1)
 

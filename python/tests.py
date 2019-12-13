@@ -7,6 +7,13 @@ non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
 from __future__ import print_function
+from __future__ import division
+from past.builtins import cmp
+from builtins import zip
+from builtins import str
+from builtins import hex
+from past.utils import old_div
+from builtins import object
 from pylab import *
 import pdb
 
@@ -72,21 +79,21 @@ def whisker_cmp(a,b):
   return cmp( a.y[0], b.y[0] )
 
 def wvdsort(wvd):
-  return sorted( wvd.values(), whisker_cmp )
+  return sorted( list(wvd.values()), whisker_cmp )
 
 def wvdsort_get_keys(wvd):
-  return [x[0] for x in sorted(wvd.items(), cmp=whisker_cmp, key = lambda x:x[-1]) ]
+  return [x[0] for x in sorted(list(wvd.items()), cmp=whisker_cmp, key = lambda x:x[-1]) ]
 
 def plot_whiskers( wv, *args, **kwargs ):
   #xform = lambda a: 2*((a/2).round().astype(int))
   texcludes = ['marker','linestyle','markersize','linewidth']
   tkwargs = {} #'backgroundcolor':'w'}
-  for k,v in kwargs.iteritems():
+  for k,v in kwargs.items():
     if not k in texcludes:
       tkwargs[k] = v
   g = (el for el in enumerate(wv)) #default generator
   if hasattr(wv,'iteritems'):
-    g = (el for el in wv.iteritems())
+    g = (el for el in wv.items())
   else:
     g = ( (hex(id(e)),e) for e in wv )
 
@@ -305,7 +312,7 @@ class ModelBuilder( MergeModelBuilder ):
 # TRAJECTORY BUILDING
 #
 
-class VotingTrajectoryBuilder():
+class VotingTrajectoryBuilder(object):
   pass
 class ModelingTrajectoryBuilder( MergeModelBuilder ):
   def __init__(self, whiskers, frameid=0):
@@ -328,7 +335,7 @@ class ModelingTrajectoryBuilder( MergeModelBuilder ):
       txt = "%d"%tid
       for fid, wid in sequence:
         a = self._whiskers[fid][wid]
-        attenuation = 1.0 - ((fid-self._first_fid) / (0.001 + (self._last_fid-self._first_fid) ))
+        attenuation = 1.0 - (old_div((fid-self._first_fid), (0.001 + (self._last_fid-self._first_fid) )))
         cc = [x*attenuation for x in c]
         plot(a.x    ,a.y        ,color=cc , alpha = attenuation)
         text(a.x[-1],a.y[-1],txt,color=cc , alpha = attenuation)
@@ -338,7 +345,7 @@ class ModelingTrajectoryBuilder( MergeModelBuilder ):
   def compile(self):
     t = {}
     for tid, sequence in enumerate(self._models):
-      if not tid in t.keys():
+      if not tid in list(t.keys()):
         t[tid] = {}
       for fid,wid in sequence:
         if not fid in t[tid]:

@@ -8,21 +8,24 @@ non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
 from __future__ import print_function
+from __future__ import division
 
+from past.builtins import cmp
+from past.utils import old_div
 from future.utils import raise_
 def helper_face_point(shape, directive):
   helpers = {
-   'top'    : lambda : (  shape[1]/2 ,  -shape[0]/2) ,
-   'left'   : lambda : ( -shape[1]/2 ,   shape[0]/2) ,
-   'bottom' : lambda : (  shape[1]/2 , 3*shape[0]/2) ,
-   'right'  : lambda : (3*shape[1]/2 ,   shape[0]/2)
+   'top'    : lambda : (  old_div(shape[1],2) ,  old_div(-shape[0],2)) ,
+   'left'   : lambda : ( old_div(-shape[1],2) ,   old_div(shape[0],2)) ,
+   'bottom' : lambda : (  old_div(shape[1],2) , old_div(3*shape[0],2)) ,
+   'right'  : lambda : (old_div(3*shape[1],2) ,   old_div(shape[0],2))
   }
 
   try:
     return helpers[directive]()
   except KeyError:
     print("Available directives")
-    for k in helpers.iterkeys():
+    for k in helpers.keys():
       print('\t',k)
     raise_(Exception, 'Could not use supplied directive: %s'%directive)
 

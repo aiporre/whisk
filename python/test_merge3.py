@@ -8,6 +8,13 @@ to the author. All other rights reserved.
 """
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from builtins import next
+from builtins import str
+from builtins import map
+from builtins import zip
+from builtins import object
+from past.utils import old_div
 from .tests import plot_whiskers
 from ui.whiskerdata.trace import Whisker_Seg
 from numpy import *
@@ -31,8 +38,8 @@ def load():
   return w,movie
 
 def check_bounds(wvd,shape):
-  for fid, wv in wvd.iteritems():
-    for i,w in wv.iteritems():
+  for fid, wv in wvd.items():
+    for i,w in wv.items():
       for x,y,t,s in w:
         if x<0 or x>=shape[1] or y<0 or y>=shape[0]:
           print("out of bounds")
@@ -44,7 +51,7 @@ def check_bounds(wvd,shape):
 
 def fix(wvd,movie,scale=2, signal_per_pixel = 0, max_dist = 60, max_angle = 20.*pi/180.):
   shape = movie[0].shape
-  for fid,wv in wvd.items():
+  for fid,wv in list(wvd.items()):
     print(fid)
     table = CollisionTable( wv, shape, scale )
     r = set( resolution( table, wv ) )
@@ -74,7 +81,7 @@ def compute_join_curvature( px, py ):
   ypp = polyder( py, 2 )
   pn = polyadd( polymul( xp, ypp ), polymul( yp, xpp )) #numerator
   pd = polyadd( polymul( xp, xp ) , polymul( yp, yp ) ) #denominator
-  integrand = lambda t:  fabs(polyval( pn, t )/( polyval( pd, t )**(1.5)) ) 
+  integrand = lambda t:  fabs(old_div(polyval( pn, t ),( polyval( pd, t )**(1.5))) ) 
   return quad(integrand, 0, 1) [0]
 
 def compute_join_angle( px, py ):
@@ -94,7 +101,7 @@ def _compute_intensity( im, x, y ):
   score = 0
   for j,i in p:
     score += im[i,j]
-  return score/len(p)
+  return old_div(score,len(p))
 
 def compute_join_intensity( im, px, py ):
   tt = linspace(0,1,50)
@@ -116,8 +123,8 @@ def compute_join_score( im, px, py, thick = 2 ):
   dL  = sqrt( dx**2 + dy**2 )
 
   a = _compute_intensity(im, ux, uy )
-  b = _compute_intensity(im, ux + thick*dy/dL , uy - thick*dx/dL )
-  c = _compute_intensity(im, ux - thick*dy/dL , uy + thick*dx/dL )
+  b = _compute_intensity(im, ux + old_div(thick*dy,dL) , uy - old_div(thick*dx,dL) )
+  c = _compute_intensity(im, ux - old_div(thick*dy,dL) , uy + old_div(thick*dx,dL) )
   return (2*a - b - c)/4.0
 
 def solve_polynomial_join( left, right, reverse = 0):
@@ -151,8 +158,8 @@ def solve_polynomial_join( left, right, reverse = 0):
   ll = len(left)
   #L = length( right.x, right.y ) + length( left.x, left.y )
   #dd = hypot( left.x[0] - right.x[-1], left.y[0] - right.y[-1] )
-  nl = ll/4
-  nr = lr/4
+  nl = old_div(ll,4)
+  nr = old_div(lr,4)
   slope = lambda v: v[ 0] - v[-1]                   # want the total change over the length
   #slope = lambda v: diff(v).mean()
   length = lambda x,y: hypot(diff(x),diff(y)).sum() # euclidian distance in pixels
@@ -165,42 +172,42 @@ def solve_polynomial_join( left, right, reverse = 0):
   if nr < 2 and nl < 2: 
     lnorm = length(  left.x       ,  left.y        ) 
     rnorm = length( right.x       , right.y        ) 
-    dly =  diff( left.y ).mean() / lnorm
-    dlx =  diff( left.x ).mean() / lnorm
-    dry =  diff(right.y ).mean() / rnorm
-    drx =  diff(right.x ).mean() / rnorm
+    dly =  old_div(diff( left.y ).mean(), lnorm)
+    dlx =  old_div(diff( left.x ).mean(), lnorm)
+    dry =  old_div(diff(right.y ).mean(), rnorm)
+    drx =  old_div(diff(right.x ).mean(), rnorm)
     nl = 0
     nr = lr - 1
   elif nr < 2:                        # use the derivative on the other side
     lnorm = length(  left.x[:nl],  left.y[:nl] ) 
     rnorm = length( right.x       , right.y        ) 
-    dly =  -slope( left.y[(-nl):]  ) / lnorm
-    dlx =  -slope( left.x[(-nl):]  ) / lnorm
-    dry =  diff(right.y ).mean() / rnorm
-    drx =  diff(right.x ).mean() / rnorm
+    dly =  old_div(-slope( left.y[(-nl):]  ), lnorm)
+    dlx =  old_div(-slope( left.x[(-nl):]  ), lnorm)
+    dry =  old_div(diff(right.y ).mean(), rnorm)
+    drx =  old_div(diff(right.x ).mean(), rnorm)
     nr = lr - 1
     #print dly,dlx,dry,drx
   elif nl < 2:                        # use the derivative on the other side
     rnorm = length( right.x[:nr], right.y[:nr] ) 
     lnorm = length(  left.x       ,  left.y        ) 
-    dry =  -slope(right.y[:nr]  ) / rnorm
-    drx =  -slope(right.x[:nr]  ) / rnorm
-    dly =  diff( left.y ).mean() / lnorm
-    dlx =  diff( left.x ).mean() / lnorm
+    dry =  old_div(-slope(right.y[:nr]  ), rnorm)
+    drx =  old_div(-slope(right.x[:nr]  ), rnorm)
+    dly =  old_div(diff( left.y ).mean(), lnorm)
+    dlx =  old_div(diff( left.x ).mean(), lnorm)
     nl = 0
   else:                               # the "normal" case
     rnorm = length( right.x[:nr], right.y[:nr] )       # Compute path length of right border region
     lnorm = length(  left.x[(-nl):],  left.y[(-nl):] ) # Compute path length of left  border region
-    dry =  -slope(right.y[:nr]  ) / rnorm              # Compute dy/dl for right side
-    drx =  -slope(right.x[:nr]  ) / rnorm              # etc...
-    dly =  -slope( left.y[(-nl):]  ) / lnorm
-    dlx =  -slope( left.x[(-nl):]  ) / lnorm
+    dry =  old_div(-slope(right.y[:nr]  ), rnorm)              # Compute dy/dl for right side
+    drx =  old_div(-slope(right.x[:nr]  ), rnorm)              # etc...
+    dly =  old_div(-slope( left.y[(-nl):]  ), lnorm)
+    dlx =  old_div(-slope( left.x[(-nl):]  ), lnorm)
   rnorm = hypot( left.x[0] - right.x[0], left.y[0] - right.y[0] ) 
   lnorm = hypot( left.x[-1]- right.x[0], left.y[-1]- right.y[0] )
-  if not isfinite(dlx): dlx =(left.x[0]  - right.x[0])/lnorm
-  if not isfinite(dly): dly =(left.y[0]  - right.y[0])/lnorm
-  if not isfinite(drx): drx =(left.x[-1] - right.x[0])/rnorm
-  if not isfinite(dry): dry =(left.y[-1] - right.y[0])/rnorm
+  if not isfinite(dlx): dlx =old_div((left.x[0]  - right.x[0]),lnorm)
+  if not isfinite(dly): dly =old_div((left.y[0]  - right.y[0]),lnorm)
+  if not isfinite(drx): drx =old_div((left.x[-1] - right.x[0]),rnorm)
+  if not isfinite(dry): dry =old_div((left.y[-1] - right.y[0]),rnorm)
    
   if reverse:
     dlx = -dlx
@@ -227,7 +234,7 @@ def solve_polynomial_join( left, right, reverse = 0):
   
   if not (isfinite(cx).any() and isfinite(cy).any()):
     pdb.set_trace()
-  return map( lambda t: array(t).squeeze() , (cx,cy) )
+  return [array(t).squeeze() for t in (cx,cy)]
 
 def plot_join(px,py,*args,**kwargs):
   from pylab import plot, polyval
@@ -249,8 +256,8 @@ def plot_test(px,py,thick=2):
   dL  = sqrt( dx**2 + dy**2 )
 
   plot( ux, uy , '.-')
-  plot( ux + thick*dy/dL , uy - thick*dx/dL ,'-')
-  plot( ux - thick*dy/dL , uy + thick*dx/dL ,'-' )
+  plot( ux + old_div(thick*dy,dL) , uy - old_div(thick*dx,dL) ,'-')
+  plot( ux - old_div(thick*dy,dL) , uy + old_div(thick*dx,dL) ,'-' )
 
 def filter_ends( wv, min_score, shape, border = 10 ):
   """
@@ -258,7 +265,7 @@ def filter_ends( wv, min_score, shape, border = 10 ):
 
   Returns an iterator yielding (Whisker_Seg, side).
   """
-  maxy, maxx = map( lambda x: x - border, shape )
+  maxy, maxx = [x - border for x in shape]
   minx, miny = border, border
   test_point = lambda x,y: x>minx and x<maxx and y > miny and y < maxy
   bordertest = lambda e,side: test_point( e.x[side], e.y[side] )
@@ -321,9 +328,9 @@ def choose_gaps(im,wv, signal_per_pixel = 0.0, max_dist=60, max_angle = pi/4.):
       dth = dtheta(a,b)
       v = end_direction(a,0)
       norm = hypot(*v)
-      proj = dot( v/norm, (dx,dy) )
+      proj = dot( old_div(v,norm), (dx,dy) )
       # jth: angle change from a to direct line joining a,b
-      jth = fabs(arctan2( hypot(*( dx-proj*v[0]/norm, dy-proj*v[1]/norm )) , proj )) 
+      jth = fabs(arctan2( hypot(*( dx-old_div(proj*v[0],norm), dy-old_div(proj*v[1],norm) )) , proj )) 
       #print i,j,
       #print "\tD: %g Proj: %g Theta: %g"%(d,proj,jth*180/pi)
       l=0;
@@ -332,7 +339,7 @@ def choose_gaps(im,wv, signal_per_pixel = 0.0, max_dist=60, max_angle = pi/4.):
         l = compute_join_score(im,px,py)
         if l < -signal_per_pixel:
           #plot_test(px,py)
-          print("\tScore: %g Theta: %g"%(l,jth*180/pi))
+          print("\tScore: %g Theta: %g"%(l,old_div(jth*180,pi)))
           e = make_joining_whisker(px,py,d,b.thick[-1],b.scores[-1],a.thick[ 0],a.scores[ 0])
           yield (b,e,a),l
 
@@ -533,8 +540,8 @@ def merge( match ):
           dep[mb[0]] = 1
   # partition into two sets.  Those to keep and those to discard.
   # Those to keep depend on none of the others.
-  return [ k for k,v in dep.iteritems() if v==0 ], \
-         [ k for k,v in dep.iteritems() if v!=0 ]
+  return [ k for k,v in dep.items() if v==0 ], \
+         [ k for k,v in dep.items() if v!=0 ]
 
 class CollisionTable(object):
   def __init__(self, wvd, shape, scale):
@@ -543,21 +550,21 @@ class CollisionTable(object):
     self._map = {}
     self._shape  = shape
     self._scale  = scale
-    self._stride = stride = shape[1]/scale
-    self.topx   = lambda p: int(p[0]/scale) + stride * int(p[1]/scale)
+    self._stride = stride = old_div(shape[1],scale)
+    self.topx   = lambda p: int(old_div(p[0],scale)) + stride * int(old_div(p[1],scale))
     self._build_inverse_table( wvd )
   
   def _build_inverse_table(self,  wvd ):
     g = enumerate(wvd)
     if isinstance(wvd, dict):
-      g = wvd.iteritems()
+      g = iter(wvd.items())
     for i,w in g:
       self.add(w)
 
   def update( self, changes ):
     """ Changes is a dict mapping old whisker segments to new segments """
     last = None
-    for w,p in changes.iteritems():
+    for w,p in changes.items():
       self.remove(w)
       if p:
         self.add(p[0]) # add back ends
@@ -568,7 +575,7 @@ class CollisionTable(object):
 
   def add(self, w):
     if not w: return
-    hash = lambda e: enumerate( map(self.topx,zip(e.x,e.y)) )
+    hash = lambda e: enumerate( map(self.topx,list(zip(e.x,e.y))) )
     for i,px in hash(w):
       self._map.setdefault(px,set()).add( (w,i) )
     for i,px in hash(w): # scan back through and remove repeat hits on a pixel
@@ -577,7 +584,7 @@ class CollisionTable(object):
 
   def remove(self, w):
     if not w: return
-    hash = lambda e: enumerate( map(self.topx,zip(e.x,e.y)) )
+    hash = lambda e: enumerate( map(self.topx,list(zip(e.x,e.y))) )
     for i,px in hash(w):
       s = self._map.get(px)
       if s:
@@ -589,7 +596,7 @@ class CollisionTable(object):
       yield m
       m = next(self)
 
-  def next(self):
+  def __next__(self):
     """ This changes the inverse table by removing hits.
 
     Returns a (Whisker_Seg, index),(Whisker_Seg, index)...  tuple
@@ -597,7 +604,7 @@ class CollisionTable(object):
     """
     todelete = []
     retval = None
-    for px,s in self._map.iteritems():
+    for px,s in self._map.items():
       todelete.append(px) # get rid of references to visited pixels
       if len(s) > 1:
         retval = s
@@ -609,9 +616,9 @@ class CollisionTable(object):
     return retval
   
   def counts( self ):
-    tosc = lambda e: e/self._scale
-    im = zeros(map(tosc, self._shape))
+    tosc = lambda e: old_div(e,self._scale)
+    im = zeros(list(map(tosc, self._shape)))
     imr = im.ravel()
-    for px,s in self._map.iteritems():
+    for px,s in self._map.items():
       imr[px] = len(s) #len(set( [e for e,i in s] ))
     return im

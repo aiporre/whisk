@@ -23,6 +23,10 @@ All rights reserved.
 Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
+from __future__ import division
+from builtins import map
+from past.utils import old_div
+from builtins import object
 import pdb
 from numpy import floor
 
@@ -51,7 +55,7 @@ class IMovieReader(object):
   def rewind(self):
     self.current_frame_id = 0
     return self
-  def next(self):
+  def __next__(self):
     if self.current_frame_id >= len(self):
       raise StopIteration
     self.current_frame_id += 1
@@ -114,16 +118,16 @@ class AdjustStippledGainReader( IMovieReader ):
     mask = im > im.mean()
     
     evener = lambda x: x - x%2 #makes the dimensions even by truncating the last line if necessary
-    xd,yd = map(evener, im.shape)
-    hratio = im[:xd:2]/im[1:xd:2]                     # compute ratio of odd and even lines
+    xd,yd = list(map(evener, im.shape))
+    hratio = old_div(im[:xd:2],im[1:xd:2])                     # compute ratio of odd and even lines
     hmask  = mask[:xd:2]                              # ...consider only those pixels above the mean
     hgain  = hratio[hmask].mean()                     # compute the correction factor
-    hstat  = abs( (hgain-1.0) / hratio[hmask].std() ) # compute a significance statistic
+    hstat  = abs( old_div((hgain-1.0), hratio[hmask].std()) ) # compute a significance statistic
    
-    vratio = im[:,:yd:2]/im[:,1:yd:2]
+    vratio = old_div(im[:,:yd:2],im[:,1:yd:2])
     vmask  = mask[:,:yd:2]
     vgain  = vratio[vmask].mean()
-    vstat  = abs( (vgain-1.0) / vratio[vmask].std() ) 
+    vstat  = abs( old_div((vgain-1.0), vratio[vmask].std()) ) 
          
     #pdb.set_trace()
     if hstat > vstat:
@@ -137,7 +141,7 @@ class AdjustStippledGainReader( IMovieReader ):
 
   def __getitem__(self, idx): 
     im = self._reader[idx].copy()
-    saturation = floor(255/self._gain)
+    saturation = floor(old_div(255,self._gain))
     mask = im > saturation;
     #pdb.set_trace()
     if self._direction == 'horizontal':          

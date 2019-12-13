@@ -7,6 +7,9 @@ non-profit research and educational purposes as long as proper credit is given
 to the author. All other rights reserved.
 """
 from __future__ import print_function
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 from pylab import *
 from numpy import *
 import traceback,sys
@@ -24,12 +27,12 @@ def doone(im,wvd,fid,fps=1000):
           'alpha'    : 1.0
           } 
   imshow(im,cmap=cm.gray,hold=0)
-  for wid,e in wvd[fid].iteritems():
+  for wid,e in wvd[fid].items():
     plot(e.x,e.y,**style(wid))
   axis('off')
   subplots_adjust(0,0,1,1,0,0)
   if fps>0:
-    text(80,20,"% 5d ms"%int(1000.0*fid/double(fps)),
+    text(80,20,"% 5d ms"%int(old_div(1000.0*fid,double(fps))),
       family  ='sans-serif',
       fontsize='large',
       weight='bold',
@@ -54,7 +57,7 @@ def doone_w_traj(movie,w,t,fid,fps):
           'alpha'    : 1.0}
 
   def gettid(frm,seg):
-    for i,traj in t.iteritems():
+    for i,traj in t.items():
       if traj.get(frm) == seg:
         return i
     return None
@@ -64,7 +67,7 @@ def doone_w_traj(movie,w,t,fid,fps):
 
   #ioff()
   imshow(im,cmap=cm.gray,hold=0)
-  for wid,e in wv.iteritems():
+  for wid,e in wv.items():
    #tt = linspace(0,1,len(e))
    #px = polyfit(tt,e.x,5)
    #py = polyfit(tt,e.y,5)
@@ -73,7 +76,7 @@ def doone_w_traj(movie,w,t,fid,fps):
     plot( e.x,e.y,
           **getstyle(gettid(fid,wid)))
   if fps>0:
-    text(80,20,"% 5d ms"%int(1000.0*fid/double(fps)),
+    text(80,20,"% 5d ms"%int(old_div(1000.0*fid,double(fps))),
       family  ='sans-serif',
       fontsize='large',
       weight='bold',
@@ -131,9 +134,9 @@ if __name__=='__main__':
   N.dest_=N.dest_.strip()
   try:
     if m:
-      doall_w_traj(v,w,m.get_trajectories(),range(N.minframe,N.maxframe+1),N.dest_,N.fps)
+      doall_w_traj(v,w,m.get_trajectories(),list(range(N.minframe,N.maxframe+1)),N.dest_,N.fps)
     else:
-      doall(v,w,range(N.minframe,N.maxframe+1),dest=N.dest_,fps=N.fps)
+      doall(v,w,list(range(N.minframe,N.maxframe+1)),dest=N.dest_,fps=N.fps)
   except:
     traceback.print_exc(file=sys.stdout)
     sys.stdout.flush()

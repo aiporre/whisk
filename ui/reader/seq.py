@@ -8,6 +8,7 @@ Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
 from __future__ import absolute_import
+from builtins import range
 from ctypes import *
 from ctypes.util import find_library
 import numpy
@@ -103,7 +104,7 @@ class SeqReader(IMovieReader):
 
   def __getitem__(self,idx):
     if isinstance(idx, slice):
-      shape = [len( range(len(self))[idx] ) ]
+      shape = [len( list(range(len(self)))[idx] ) ]
       shape.extend(self.size)
       indices = idx.indices( len(self) )
       buffer = zeros( shape, dtype = _bpp[ self._reader.contents.bitdepthreal ] )

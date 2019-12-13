@@ -10,6 +10,7 @@ license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
 # Todo list
 # =========
 #
@@ -54,6 +55,9 @@ from __future__ import absolute_import
 #   - trajectory_id --> { frame_id --> segment_id}
 #
 
+from builtins import str
+from builtins import zip
+from past.utils import old_div
 import os, sys, traceback, pygame
 from numpy import * 
 from   .reader import Reader
@@ -111,7 +115,7 @@ def render_plane(screen, im, inc=1, goto=None, scale=1, baseline=None, mode=None
   
   if baseline != None:
     a = (a - baseline - 1).astype(float)
-    a = (255*(a-a.min())/(a.ptp())).astype(uint8)
+    a = (old_div(255*(a-a.min()),(a.ptp()))).astype(uint8)
   
   if scale != 1:
     width,height = s.get_size()
@@ -158,7 +162,7 @@ def draw_whisker( surf, w, radius=12, color=(0,255,255,200) , scale=1, color2=(0
     cs = (w.thick + thick) * cos(pi/2. - eth)
     ss = (w.thick + thick) * sin(pi/2. - eth)
     p = list( zip(x - cs, y + ss) )
-    p.extend( reversed( zip(x + cs,y - ss) ) )
+    p.extend( reversed( list(zip(x + cs,y - ss)) ) )
     p.append( p[0] )
   elif drawing_modes[mode["draw"]] == "backbone":
     p = list( zip(x , y ) )
@@ -249,7 +253,7 @@ def main( filename,
   
   data_width,data_height = im.size
   
-  s = 0.6 * min(map(lambda p: p[0]/float(p[1]), zip(desktop_size, reversed(im.size)) ))
+  s = 0.6 * min([p[0]/float(p[1]) for p in zip(desktop_size, reversed(im.size))])
   scale = (s,s)
   size = width,height = [int(s*e) for s,e in zip(scale,reversed(im.size))]
   flags =  pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE
@@ -328,7 +332,7 @@ def main( filename,
           # 
           DIRTY = 1
           p = event.pos   
-          ps = [ round(x/s) for s,x in zip(scale,p) ] #map screen coordinates to data coordinates
+          ps = [ round(old_div(x,s)) for s,x in zip(scale,p) ] #map screen coordinates to data coordinates
           iframe = im.tell()
           
           # find closest segment in frame
@@ -338,14 +342,14 @@ def main( filename,
           if mode["tracing"]:
             inc = 0;
           if iframe in whiskers:
-            for segid,wseg in whiskers[ iframe ].iteritems():
+            for segid,wseg in whiskers[ iframe ].items():
               d = distance( ps, wseg )
               if d < bestd:
                 best = segid
                 bestd = d
             if bestd < cursor_size :
               #unlabel 'best' in existing trajectories
-              for tid, v in trajectories.iteritems():
+              for tid, v in trajectories.items():
                 if v.get(iframe,None) == best:
                   del v[iframe]
               #found a whisker segment so link it into the trajectory
@@ -395,11 +399,11 @@ def main( filename,
         elif event.button == 3: # mouse right click
           DIRTY = 1
           p = event.pos   
-          ps = [ round(x/s) for s,x in zip(scale,p) ] #map screen coordinates to data coordinates
+          ps = [ round(old_div(x,s)) for s,x in zip(scale,p) ] #map screen coordinates to data coordinates
           iframe = im.tell()
           #pdb.set_trace()
           a = a.astype( float )
-          a = (255*(a-a.min())/(a.ptp())).astype(uint8)
+          a = (old_div(255*(a-a.min()),(a.ptp()))).astype(uint8)
           sd = calc_seed( a, ps , 8 ) #cursor_size)
           inc = 0
           if sd:
@@ -562,7 +566,7 @@ def main( filename,
             DIRTY = 1
             if event.mod & pygame.KMOD_SHIFT:
               #erase all trajectory labels
-              for key in trajectories.keys():
+              for key in list(trajectories.keys()):
                 del trajectories[key]
             else:
               #get rid of the selected whisker segment
@@ -577,9 +581,7 @@ def main( filename,
           if event.mod & pygame.KMOD_SHIFT:
             And = lambda a,b: a and b
             none_missing = lambda fid: reduce(And, 
-                                              map(lambda t: fid in trajectories[t] and trajectories[t][fid] in whiskers.get(fid,{}),
-                                                  filter(lambda t:t>=0, 
-                                                         trajectories.keys() ) ))
+                                              [fid in trajectories[t] and trajectories[t][fid] in whiskers.get(fid,{}) for t in [t for t in list(trajectories.keys()) if t>=0]])
           else:
             none_missing = lambda fid: fid in trajectories.get(current_whisker,{}) and trajectories.get(current_whisker,{}).get(fid,-1) in whiskers.get(fid,{})
 
@@ -592,9 +594,7 @@ def main( filename,
           if event.mod & pygame.KMOD_SHIFT:
             And = lambda a,b: a and b
             none_missing = lambda fid: reduce(And, 
-                                    map(lambda t: fid in trajectories[t] and trajectories[t][fid] in whiskers.get(fid,{}),
-                                        filter(lambda t:t>=0, 
-                                               trajectories.keys() ) ))
+                                    [fid in trajectories[t] and trajectories[t][fid] in whiskers.get(fid,{}) for t in [t for t in list(trajectories.keys()) if t>=0]])
           else:
             none_missing = lambda fid: fid in trajectories.get( current_whisker,{} ) and trajectories.get( current_whisker,{}).get(fid,-1) in whiskers.get(fid,{});
 
@@ -634,8 +634,7 @@ def main( filename,
 
     if mode["showcursorpos"] and cursor_rect:
       textsurf = font.render( 
-                    "cursor: (%4d,%4d)"%tuple(map( lambda x: int(x/scale[0]), 
-                                                   cursor_rect.center )),
+                    "cursor: (%4d,%4d)"%tuple([int(old_div(x,scale[0])) for x in cursor_rect.center]),
                               1, (255,255,255) )
       ori = textsurf.get_rect()
       ori.topleft = rect.bottomleft
@@ -686,19 +685,19 @@ def render(screen, im, current_whisker, state, bg, scale, **kwargs):
   coloralt = (255,155, 55,255)
   if im.tell() in whiskers:
     wv = whiskers[im.tell()]
-    ts = [(k,v[im.tell()]) for k,v in trajectories.iteritems() if im.tell() in v]
+    ts = [(k,v[im.tell()]) for k,v in trajectories.items() if im.tell() in v]
     seg2traj = {}
     for itraj,iseg in ts:
       seg2traj[iseg] = itraj
-    for (iseg, w) in wv.iteritems():
+    for (iseg, w) in wv.items():
       try:
-        color = cmap( seg2traj[iseg] / (NCOLORS+0.001), bytes = True )
+        color = cmap( old_div(seg2traj[iseg], (NCOLORS+0.001)), bytes = True )
       except KeyError:
         color = coloralt
       draw_whisker(bg,w,color=color,color2=color ,scale=scale, mode=mode,facehint=facehint)
-    if marked_seg in wv.keys():
+    if marked_seg in list(wv.keys()):
       try:
-        color = cmap( current_whisker / (NCOLORS+0.001), bytes = True )
+        color = cmap( old_div(current_whisker, (NCOLORS+0.001)), bytes = True )
       except KeyError:
         color = coloralt
       draw_whisker(bg,wv[marked_seg],color=color,color2=color ,scale=scale, mode=mode,facehint=facehint)
@@ -803,7 +802,7 @@ unwanted changes.  """
         whiskers_file_name = os.path.splitext( args[-1] )[0]
     else:
       del files[ os.path.splitext(movie_file)[-1] ]
-      whiskers_file_name = files.values()
+      whiskers_file_name = list(files.values())
 
     whiskers = main(movie_file,
                     whiskers_file_name, 

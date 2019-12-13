@@ -10,6 +10,9 @@ license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import map
+from builtins import range
+from builtins import object
 import os,sys
 from ctypes import *
 from ctypes.util import find_library
@@ -196,9 +199,9 @@ class MeasurementsTable(object):
     data = self.asarray()
     t = {}
     for row in data:
-      r = map(int,row[:3])
+      r = list(map(int,row[:3]))
       t.setdefault( r[0],{} ).setdefault( r[1], r[2] ) 
-    if -1 in t.keys():
+    if -1 in list(t.keys()):
       del t[-1]
     return t
 
@@ -211,9 +214,9 @@ class MeasurementsTable(object):
     """
     trajectories = self.get_trajectories()
     f = open( filename, 'w' )
-    for k,v in trajectories.iteritems():
+    for k,v in trajectories.items():
       if not k in excludes:
-        for s,t in v.iteritems():
+        for s,t in v.items():
           print('%d,%d,%d'%(k,s,t), file=f)
     return self
 
@@ -257,11 +260,11 @@ class MeasurementsTable(object):
     True
     """
     inv = {}
-    for tid,t in traj.iteritems():
-      for k in t.iteritems():
+    for tid,t in traj.items():
+      for k in t.items():
         inv[k] = tid  
 
-    for i in xrange(self._nrows):  #update new
+    for i in range(self._nrows):  #update new
       row = self._measurements[i]
       s = inv.get( (row.fid,row.wid) )
       row.state = s if (not s is None) else -1 
@@ -286,7 +289,7 @@ class MeasurementsTable(object):
                               byref(mn),
                               byref(mx))
     f = lambda x: x.value if x.value >=0 else 0
-    return map(f,[mn,mx])
+    return list(map(f,[mn,mx]))
 
   def iter_state(self):
     """
@@ -300,7 +303,7 @@ class MeasurementsTable(object):
     3
     """
     mn,mx = self.get_state_range()
-    return xrange(mn,mx+1)
+    return range(mn,mx+1)
 
   def get_shape_table(self):
     """  
@@ -569,7 +572,7 @@ class MeasurementsTable(object):
     frames = ctraj.Measurements_Tables_Get_Diff_Frames( self._measurements, self._nrows, 
                                                         table._measurements, table._nrows, 
                                                         byref(nframes) )
-    return [frames[i] for i in xrange(nframes.value)]
+    return [frames[i] for i in range(nframes.value)]
 
   def est_length_threshold(self,lowpx=1.0/0.04,highpx=50.0/0.04):
     ncount = c_int(0)
@@ -678,7 +681,7 @@ def batch_make_measurements(sourcepath, ext = '*.seq', label = 'curated'):
     if not os.path.exists( prefix + '.measurements' ):
       t,tid = load_trajectories( prefix + '.trajectories' )
       print(prefix)
-      print(t.keys())
+      print(list(t.keys()))
       w = Load_Whiskers( prefix + '.whiskers' ) 
       data = get_summary_data( prefix + '.npy', w, t )
       MeasurementsTable( data ).update_velocities().save( prefix + '.measurements' )
@@ -712,22 +715,22 @@ class Tests_MeasurementsTable(unittest.TestCase):
 
   def test_SortByStateAndTime(self):
     self.table.sort_by_state_time()
-    for i in xrange(1, self.table._nrows):
+    for i in range(1, self.table._nrows):
         self.failIf( (self.table._measurements[i-1].state > self.table._measurements[i].state) and 
                      (self.table._measurements[i-1].fid   > self.table._measurements[i].fid) )
-    for i in xrange(1, self.table._nrows):
+    for i in range(1, self.table._nrows):
         self.failIf( self.table._measurements[i-1].state  > self.table._measurements[i].state )
   
   def test_SortByTime(self):
     self.table.sort_by_time()
-    for i in xrange(1, self.table._nrows):
+    for i in range(1, self.table._nrows):
         self.failIf( self.table._measurements[i-1].fid  > self.table._measurements[i].fid )
 
   def test_ComputeVelocities_SomeVelocitiesAreValid(self):
     self.table.update_velocities()    
     any = lambda x,y: x or y  
     is_row_valid = lambda i: self.table._measurements[i].valid_velocity                                           
-    self.failUnless( reduce( any, map( is_row_valid, xrange(self.table._nrows) )) )
+    self.failUnless( reduce( any, list(map( is_row_valid, range(self.table._nrows) ))) )
 
   def test_SizeSelectVelocities_StatesPartitionTable(self):
     self.table.update_velocities()
@@ -920,7 +923,7 @@ if __name__=='__main__':
                 Tests_Distributions 
                 ]
   suite = reduce( lambda a,b: a if a.addTest(b) else a, 
-                  map( unittest.defaultTestLoader.loadTestsFromTestCase, testcases ) 
+                  list(map( unittest.defaultTestLoader.loadTestsFromTestCase, testcases )) 
                 )
   suite.addTest( doctest.DocTestSuite() )
   runner = unittest.TextTestRunner(verbosity=2,descriptions=1).run(suite)

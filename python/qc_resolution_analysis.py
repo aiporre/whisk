@@ -9,6 +9,9 @@ to the author. All other rights reserved.
 """
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import zip
+from builtins import map
+from builtins import range
 import warnings
 from . import trace
 import numpy
@@ -29,8 +32,8 @@ def analyze_decimation_error_types_single_frame( im, scale=0.5, xform = zoom ):
   shape = ims.shape
   px_scale = shape[0] / float( im.shape[0] )
   hits = lambda x_sc: set( zip(*where(pixelize( trace.find_segments(x_sc[0]), x_sc[1], shape ))) )
-  gold,test = map(hits, ((im ,px_scale   ), 
-                         (ims,1.0        )) )
+  gold,test = list(map(hits, ((im ,px_scale   ), 
+                         (ims,1.0        )) ))
   false_positives = test - gold
   false_negatives = gold - test
   common = gold & test
@@ -39,11 +42,11 @@ def analyze_decimation_error_types_single_frame( im, scale=0.5, xform = zoom ):
   # print "false negative rate : %f"%(torate( false_negatives ))
   # print "true  positive rate : %f"%(torate( common ))
   # print "sum                 : %f"%sum(map( torate, (false_positives, false_negatives, common) ) )
-  return map(torate, (false_positives, false_negatives, common) )
+  return list(map(torate, (false_positives, false_negatives, common) ))
 
 def analyze_decimation_error_types( movie, frames = None, xform = zoom ):
   if frames is None:
-    frames = range(len(movie))
+    frames = list(range(len(movie)))
 
   scale = linspace(0.05,1.0,20)
   errs = [ _thinking(
@@ -75,10 +78,10 @@ def pixelize( wv, scale, shape, im=None ):
   fit = lambda v: polyfit( arange(len(v)), v, 5 )
   #seg2pxs  = lambda e: map( pnt2px, zip(e.x,e.y))     # whisker segment --> pixels
   def seg2pxs(e):
-    n = max( map( len, (e.x,e.y) ) )
+    n = max( list(map( len, (e.x,e.y) )) )
     tt = linspace(0,n-1,2*(n-1))
     warnings.simplefilter( "ignore", numpy.RankWarning )
-    px,py = map( fit, (e.x,e.y) )
+    px,py = list(map( fit, (e.x,e.y) ))
     warnings.simplefilter( "default", numpy.RankWarning )
     return [pnt2px(p) for p in zip( polyval(px,tt), polyval(py,tt) )]
 

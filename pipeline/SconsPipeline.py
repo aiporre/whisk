@@ -1,3 +1,4 @@
+from builtins import next
 from SCons.Script import *
 import os
 import re
@@ -51,11 +52,9 @@ def dfs_consume_tuples(g,cur):
   yield rest()
 
 def flatten(tree):
-  isbranch = lambda y: any( map( lambda x: isinstance(y,x),
-                                [tuple,
+  isbranch = lambda y: any( [isinstance(y,x) for x in [tuple,
                                  list,
-                                 SCons.Node.NodeList]
-                               ))
+                                 SCons.Node.NodeList]])
   if not isbranch(tree):
     yield tree
   else:
@@ -77,8 +76,7 @@ def dfs_reduce(f,tree):
     tree = iter(tree)
     for node in tree:
       if isinstance(node,tuple):
-        return tuple ( map(lambda e: _dfs_reduce( f, e, a ),   #branch recursively
-                          dfs_consume_tuples(tree,node) )
+        return tuple ( [_dfs_reduce( f, e, a ) for e in dfs_consume_tuples(tree,node)]
                     )
       else:
         a = node if a is None else f(a,node)                   #process node
@@ -156,8 +154,8 @@ def pipeline_curated(env, source):
     """
     node = node[0]
     target  = change_ext( node, '[traj].measurements' )
-    sources = map( lambda e: change_ext(node, e),['.measurements',
-                                                  '.trajectories'] )
+    sources = [change_ext(node, e) for e in ['.measurements',
+                                                  '.trajectories']]
     out = env.Command( target, sources, "measure.py $SOURCES $TARGET" )
     return out
 

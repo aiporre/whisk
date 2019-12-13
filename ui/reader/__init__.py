@@ -8,6 +8,7 @@ Use is subject to Janelia Farm Research Campus Software Copyright 1.1
 license terms (http://license.janelia.org/license/jfrc_copyright_1_1.html).
 """
 from __future__ import absolute_import
+from builtins import map
 from future.utils import raise_
 import warnings
 warnings.simplefilter( "ignore", UserWarning )

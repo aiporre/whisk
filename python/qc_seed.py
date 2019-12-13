@@ -1,5 +1,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import sys
 from matplotlib import cm,rc
 from matplotlib.pylab import * #imshow,draw,colorbar,clf,clabel,axis,savefig
@@ -16,7 +19,7 @@ def play_seed_angles(video,maxr=9,thresh=0.99,alpha=0.75,bg=63,every=slice(None)
   mask = video[::100].max(axis=0)>bg
   f = lambda im: trace.compute_seed_fields_windowed(im,maxr=maxr,maxiter=1,window=(0.0,0.0))
   def make(im):
-    angles = abs(f(im)[1]*180/pi);
+    angles = abs(old_div(f(im)[1]*180,pi));
     out = cm.hsv(angles/180.0);
     out[:,:,3] = mask*(f(im)[2]>thresh)*alpha;
     return out,angles
@@ -24,8 +27,8 @@ def play_seed_angles(video,maxr=9,thresh=0.99,alpha=0.75,bg=63,every=slice(None)
   rc('image',interpolation='nearest');
   rc('figure.subplot',bottom=0.05,left=0.05,top=0.95,right=0.95);
   rc('figure',facecolor='w');
-  fids = range(*every.indices(len(video)))
-  for i,im in map(lambda e:(e,video[e]),fids):
+  fids = list(range(*every.indices(len(video))))
+  for i,im in [(e,video[e]) for e in fids]:
     out,angles = make(im)
     clf();
     imshow(angles,cmap=cm.hsv); 
@@ -98,8 +101,8 @@ def is_trace_generated(image,r=10,thresh=100):
   out = zeros(image.shape)
   f = lambda im: trace.compute_seed_fields_windowed(im,maxr=r,maxiter=1,window=(0.0,0.0))
   angle_radians = f(image)[1];
-  for y in xrange(0,image.shape[0]):
-    for x in xrange(0,image.shape[1]):
+  for y in range(0,image.shape[0]):
+    for x in range(0,image.shape[1]):
       seed = trace.cSeed(x,y,int(cos(angle_radians[y,x])*100),int(sin(angle_radians[y,x])*100))
       t = trace.Trace_Whisker(seed,image)
       if(t and len(t.x)>thresh):
@@ -110,8 +113,8 @@ def trace_all(image,r=10,thresh=100):
   out = []
   f = lambda im: trace.compute_seed_fields_windowed(im,maxr=r,maxiter=1,window=(0.0,0.0))
   angle_radians = f(image)[1];
-  for y in xrange(0,image.shape[0]):
-    for x in xrange(0,image.shape[1]):
+  for y in range(0,image.shape[0]):
+    for x in range(0,image.shape[1]):
       seed = trace.cSeed(x,y,int(cos(angle_radians[y,x])*100),int(sin(angle_radians[y,x])*100))
       t = trace.Trace_Whisker(seed,image)
       if(t and len(t.x)>thresh):

@@ -35,6 +35,11 @@ credit is given to the author.  All other rights reserved.
 """
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import map
+from builtins import range
+from past.utils import old_div
 from numpy import *
 import numpy
 if __name__=='__main__':
@@ -56,16 +61,16 @@ def load(moviename, whiskersname):
 
 def trajmask(t):  # returns a mask over frames of the movie - true means trajectory labels were applied there
   mask = zeros( max(t.keys())+1 )
-  mask[ t.keys() ] = 1
+  mask[ list(t.keys()) ] = 1
   return mask
 
 def hist_length(wvd):
   def lengths(wvd):
-    for wv in wvd.itervalues():
-      for w in wv.itervalues():
+    for wv in wvd.values():
+      for w in wv.values():
         yield integrate_path_length(w)
   L = array(list(lengths(wvd)))
-  hist(L, range(ceil(L.max())), edgecolor='none')
+  hist(L, list(range(ceil(L.max()))), edgecolor='none')
   title('Histogram of trace lengths');
   ylabel('Counts')
   xlabel('Path length (px)')
@@ -79,8 +84,8 @@ def features(wvd, face):
     ) 
   )
   otherside = lambda e: -1 if side(e)[0]==0 else 0
-  for fid,wv in wvd.iteritems():
-    for wid,w in wv.iteritems():
+  for fid,wv in wvd.items():
+    for wid,w in wv.items():
       follicle, dx = side(w)
       root     = otherside(w)
       try:  
@@ -101,13 +106,13 @@ def features(wvd, face):
 
 def pca(wvd,face):
   data = array(list(features(wvd,face)))[3:]
-  zscore = lambda v: (v-v.mean())/v.std()
-  for i in xrange( data.shape[1] ):
+  zscore = lambda v: old_div((v-v.mean()),v.std())
+  for i in range( data.shape[1] ):
     data[:,i] = zscore(data[:,i])
   eval, evec = eig(cov(data.T))
   idx = argsort(eval)               # ascending
   proj = lambda i: dot(evec[:,i],data.T)
-  return map( proj, reversed(idx) ) # descending (first corresponds to largest eigenvalue)
+  return list(map( proj, reversed(idx) )) # descending (first corresponds to largest eigenvalue)
 
 def classify(wvd, face, minscore = 1090, minlen = 122 ):
   data = array(list(features(wvd,face)))
@@ -133,8 +138,8 @@ def transform_classification_data(data):
 
 def estimate_number_of_trajectories(datadict):
   acc = 0
-  for v in datadict.itervalues():
-    e = [ row[0] for row in v.itervalues() ]
+  for v in datadict.values():
+    e = [ row[0] for row in v.values() ]
     acc  += sum(e)
   return acc/float(len(datadict))
 
@@ -142,12 +147,12 @@ def plot_frame_by_class(movie, wvd, datadict, iframe):
   ioff()
   cla()
   imshow(movie[iframe],hold=0, cmap=cm.gray);
-  for wid,w in wvd[iframe].iteritems():
+  for wid,w in wvd[iframe].items():
     if datadict[iframe][wid][0]:
       plot( w.x, w.y, 'g' )
     else:
       plot( w.x, w.y, 'r' )
-  map(axis,["image","off"])
+  list(map(axis,["image","off"]))
   subplots_adjust(0,0,1,1,0,0)
   ion()
   show()
@@ -160,26 +165,26 @@ def plot_frame_by_ident(movie, wvd, traj, iframe, cmap = cm.hsv, params = {}):
                         'alpha'    : 0.2},
           'text'    : { 'color'    :'w'},
          }
-  for k,v in attr.iteritems():
+  for k,v in attr.items():
     v.update( params.get(k,{}) )
 
   ntraj = float(len(traj))
   ioff()
   cla()
   imshow(movie[iframe],hold=0, cmap=cm.gray);
-  for wid,w in wvd.get(iframe,{}).iteritems():
+  for wid,w in wvd.get(iframe,{}).items():
     i = -1
-    for k,t in traj.iteritems():
+    for k,t in traj.items():
       if wid == t.get(iframe,{}):
         i=k
         break
     if i > -1:
-      plot(w.x,w.y, color = cmap(i/ntraj), **attr['whiskers'] )
+      plot(w.x,w.y, color = cmap(old_div(i,ntraj)), **attr['whiskers'] )
     else:
       plot(w.x,w.y, **attr['junk'] )
   shape = movie[iframe].shape
   text( 0.05 * shape[1], 0.05* shape[0], str(iframe), **attr['text'] )
-  map(axis,["tight","image","off"])
+  list(map(axis,["tight","image","off"]))
   ion()
   draw()
 
@@ -248,8 +253,8 @@ def make_trajectories( wvd, datadict, side, n=None ):
   if n is None:
     n = round( estimate_number_of_trajectories( datadict ))
   T = {}
-  for fid, v in datadict.iteritems():
-    good = [ wid for wid,datarow in v.iteritems() if datarow[0] == 1 ] # filter for whiskers in frame that are in the good class
+  for fid, v in datadict.items():
+    good = [ wid for wid,datarow in v.items() if datarow[0] == 1 ] # filter for whiskers in frame that are in the good class
     if len(good) == n: # got the expected number of whiskers
       mapping = argsort([ wvd[fid][wid].y[side] for wid in good  ])
       for i,idx in enumerate(mapping):
@@ -267,8 +272,8 @@ def make_trajectories2( data, face, n=None, ix = 8, iy = 9 ):
     n = round( estimate_number_of_trajectories( datadict ))
 
   T = {}
-  for fid, v in datadict.iteritems():
-    good = [ wid for wid,datarow in v.iteritems() if datarow[0] == 1 ] # filter for whiskers in frame that are in the good class
+  for fid, v in datadict.items():
+    good = [ wid for wid,datarow in v.items() if datarow[0] == 1 ] # filter for whiskers in frame that are in the good class
     if len(good) == n: # got the expected number of whiskers
       mapping = argsort([ v[wid][3] for wid in good  ])  #<--------- whisker ordering!!
       for i,idx in enumerate(mapping):
@@ -336,8 +341,8 @@ def commit_traj_to_data_table( traj, data ):
     index[ ( row[1], row[2] ) ] = i;
 
   data[:,0] = -1 #null tid
-  for tid, t in traj.iteritems():
-    for fid, wid in t.iteritems():
+  for tid, t in traj.items():
+    for fid, wid in t.items():
       try:
         data[ index[ (fid,wid) ], 0 ] = tid
       except KeyError:
@@ -349,10 +354,10 @@ def plot_whiskers_by_trajectory(movie, wvd, traj, iframe):
   #ioff()
   cla()
   imshow(movie[iframe],hold=0, cmap=cm.gray);
-  colors = cm.jet([x/float(len(traj)) for x in xrange(len(traj))])
-  for wid,w in wvd[iframe].iteritems():
+  colors = cm.jet([x/float(len(traj)) for x in range(len(traj))])
+  for wid,w in wvd[iframe].items():
     hit = 0
-    for i,t in traj.iteritems():
+    for i,t in traj.items():
       if wid == t.get(iframe):
         plot( w.x, w.y, color = colors[i], linewidth = 4, alpha = 0.5 )  
         hit = 1
@@ -360,7 +365,7 @@ def plot_whiskers_by_trajectory(movie, wvd, traj, iframe):
     if not hit:
         plot( w.x, w.y, 'k', linewidth = 2, alpha = 0.7 )  
 
-  map(axis,["image","off"])
+  list(map(axis,["image","off"]))
   subplots_adjust(0,0,1,1,0,0)
   #ion()
   show()
@@ -380,19 +385,19 @@ def render_trajectories(path,movie,wvd,traj):
 
 def organize_by_trajectories(wvd,traj):
   """ For each trajectory returns a list of whisker segments """
-  xform = lambda i: [ wvd[fid][wid] for fid,wid in traj[i].iteritems()]
-  return map( xform, traj.keys() )
+  xform = lambda i: [ wvd[fid][wid] for fid,wid in traj[i].items()]
+  return list(map( xform, list(traj.keys()) ))
 
 def organize_data_by_traj(data,traj):
   def itertrajinv(traj):
-    for tid,v in traj.iteritems():
-      for fid,wid in v.iteritems():
+    for tid,v in traj.items():
+      for fid,wid in v.items():
         yield (fid,wid),tid
   invtraj = dict( [p for p in itertrajinv(traj) ] )
   index = ones( (data.shape[0],1) ) * -1 
   for i,row in enumerate(data):
     index[i] = invtraj.get( (int(row[1]), int(row[2])) , -1 )
-  return [ data[ where(index==it)[0],: ] for it in traj.iterkeys() ]
+  return [ data[ where(index==it)[0],: ] for it in traj.keys() ]
 
 def plot_summary_data(wvd,traj,data):
   clf()
@@ -444,7 +449,7 @@ def plot_summary_measurements_table(table, px2mm=None, options={}, doshow=1):
                            'marker':'.'},
               'lines'   : {}
              }
-  for k,v in defaults.iteritems():
+  for k,v in defaults.items():
     v.update( options.get(k,{}) )
 
   ioff()
@@ -453,7 +458,7 @@ def plot_summary_measurements_table(table, px2mm=None, options={}, doshow=1):
     dt = diff(t)
     idx, = where(dt>1)
     return [ (t[i], dt[i] ) for i in idx ]
-  incrange = lambda a,b: range(a,b+1)
+  incrange = lambda a,b: list(range(a,b+1))
   states = incrange(*table.get_state_range())
   cmap = cm.hsv
   N = float(len(states))
@@ -481,7 +486,7 @@ def plot_summary_measurements_table(table, px2mm=None, options={}, doshow=1):
                     (vmin1,vmax1-vmin1),
                     edgecolors=[(0,0,0,0)],
                     linewidth = 0,
-                    facecolors=[cmap(i/N,alpha=0.7)],
+                    facecolors=[cmap(old_div(i,N),alpha=0.7)],
                     alpha = 1.0/N
                     )
   xlabel('Time (frames)')
@@ -496,16 +501,16 @@ def plot_summary_measurements_table(table, px2mm=None, options={}, doshow=1):
     vmin2,vmax2 = -lim,lim
   else:
     ylabel('Mean Curvature (1/mm)')
-    lim = max( ceil( lim/px2mm/0.1 ) * 0.1, 0.1 )
+    lim = max( ceil( old_div(lim,px2mm)/0.1 ) * 0.1, 0.1 )
     vmin2,vmax2 = -lim,lim
   plot  ( time,
-          curv/px2mm,
+          old_div(curv,px2mm),
           **defaults['scatter'] )
   for i,s in enumerate(states):
     ax.broken_barh( getbars(s), 
                     (vmin2,vmax2-vmin2),
                     edgecolors=[(0,0,0,0)],
-                    facecolors=[cmap(i/N,alpha=0.7)],
+                    facecolors=[cmap(old_div(i,N),alpha=0.7)],
                     linewidth = 0.1,
                     alpha = 1.0/N 
                     )
@@ -516,11 +521,11 @@ def plot_summary_measurements_table(table, px2mm=None, options={}, doshow=1):
   for i,tid in enumerate(states):
     t,mask = table.get_time_and_mask(tid)
     sh = table.get_shape_data(tid)
-    defaults['lines']['color'] = cmap(i/N)
+    defaults['lines']['color'] = cmap(old_div(i,N))
     subplot(211)
     plot(t,sh[:,2], **defaults['lines'] )
     subplot(212)
-    plot(t,sh[:,3]/px2mm, **defaults['lines'] )
+    plot(t,old_div(sh[:,3],px2mm), **defaults['lines'] )
   
   try:
     ax = subplot(211)
@@ -575,7 +580,7 @@ def plot_distributions_by_class(data):
   clf()
   mask = data[:,0]==0
 
-  for i in xrange(nfeat):
+  for i in range(nfeat):
     ic = 3+i
     subplot(nfeat,1,i)
     avg = data[:,ic].mean()
@@ -598,7 +603,7 @@ def plot_distributions_by_trajectory_nodata(w,traj,cmap = cm.jet):
   for i,tse in enumerate(ts):
     v[i] = array([ integrate_path_length(e) for e in tse ])
     vmax = max( vmax, v[i].max() )
-  for i,ve in v.iteritems():
+  for i,ve in v.items():
     hist(ve,arange(ceil(vmax)),ec='none',width=1,fc=cmap(i/float(len(v))),alpha = 0.5,normed=1);
   xlabel('Segment length (px)')
   ylabel('Density')
@@ -609,7 +614,7 @@ def plot_distributions_by_trajectory_nodata(w,traj,cmap = cm.jet):
   for i,tse in enumerate(ts):
     v[i] = array([ median_score(e) for e in tse ])
     vmax = max( vmax, v[i].max() )
-  for i,ve in v.iteritems():
+  for i,ve in v.items():
     hist(ve,arange(ceil(vmax)),ec='none',width=1,fc=cmap(i/float(len(v))),alpha = 0.5,normed=1);
   xlabel('Median Score')
   ylabel('Density')
@@ -620,7 +625,7 @@ def plot_distributions_by_trajectory_nodata(w,traj,cmap = cm.jet):
   for i,tse in enumerate(ts):
     v[i] = array([ median_thick(e) for e in tse ])
     vmax = max( vmax, v[i].max() )
-  for i,ve in v.iteritems():
+  for i,ve in v.items():
     hist(ve,arange(0,ceil(vmax),0.5),ec='none',width=1,fc=cmap(i/float(len(v))),alpha = 0.5,normed=1);
   xlabel('Median Thickness')
   ylabel('Density')

@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 def roc(score,predicate):
   """ roc(score,predicate) -> (precision,recall,threshold)
   """
@@ -12,5 +14,5 @@ def roc(score,predicate):
   FP  = (1-P).cumsum() # count negatives at each threshold
   FN  = TP[-1] - TP;   # total positive less the true positives found at each threshold
   #TN  = FN[-1] - FN;
-  return TP/(TP+FP), TP/(TP+FN), T
+  return old_div(TP,(TP+FP)), old_div(TP,(TP+FN)), T
 

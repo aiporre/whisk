@@ -8,6 +8,11 @@ to the author. All other rights reserved.
 """
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import map
+from builtins import range
+from past.utils import old_div
 from pylab import *
 from numpy import *
 from . import trace
@@ -29,7 +34,7 @@ im = movie[0]
 #
 
 def draw_whisker( image, w, thick, color ):
-  th = arctan2( diff(w.y) , diff(w.x) ).mean() + pi/2  
+  th = arctan2( diff(w.y) , diff(w.x) ).mean() + old_div(pi,2)  
   ox,oy = thick*cos(th),thick*sin(th)
   xy0 = r_[w.x+ox,w.y+oy].reshape(2,len(w.x)).T
   xy1 = r_[w.x-ox,w.y-oy].reshape(2,len(w.x)).T
@@ -42,12 +47,12 @@ def draw_poly( image, xy, color ):
   edges.append( ((xy[-1][0],xy[0][0]), (xy[-1][1],xy[0][1])) )
   runs = {}
   for e in edges:
-    yrange = range( floor(min(e[1])), ceil(max(e[1])+1 ))
+    yrange = list(range( floor(min(e[1])), ceil(max(e[1])+1 )))
     n = float(len(yrange))
     for i,y in enumerate( yrange ):
       if y < 0 or y >= image.shape[0]:
         continue
-      t = i/n
+      t = old_div(i,n)
       x = e[0]
       if not y in runs:
         runs[y] = [ floor(x[0] + t * ( x[1] - x[0] )) ]
@@ -57,12 +62,12 @@ def draw_poly( image, xy, color ):
         r.append( x )
         runs[y] = [min(r), max(r)]
   #sanitize
-  for y,(x0,x1) in runs.iteritems():
+  for y,(x0,x1) in runs.items():
     x0 = max(0,x0)
     x1 = min( image.shape[1], x1 ) 
     runs[y] = (x0,x1)
   #render
-  for y,(x0,x1) in runs.iteritems():
+  for y,(x0,x1) in runs.items():
     image[y][ int(x0):int(x1) ] = color
 
 def trace_from_fields( image ):
@@ -79,7 +84,7 @@ def trace_from_fields( image ):
     if mask[s[1],s[0]]==1:
       #plot( [s[0]],[s[1]],'r.' )
       #axis("image")
-      sd = cSeed(*map(int,s) )
+      sd = cSeed(*list(map(int,s)) )
       #print sd #, h[s[1],s[0]], st[s[1],s[0]]
       count += 1
       w = trace.Trace_Whisker( sd , image )
@@ -117,7 +122,7 @@ def plotfields(im):
   colorbar()
   subplot(2,2,2)
   subplot(2,2,3)
-  imshow((m+pi)*180/pi,hold=0,cmap=cm.hsv,vmin=0,vmax=360)
+  imshow(old_div((m+pi)*180,pi),hold=0,cmap=cm.hsv,vmin=0,vmax=360)
   axis("off")
   colorbar()
   subplot(2,2,4)
@@ -125,7 +130,7 @@ def plotfields(im):
   imshow(s,cmap=cm.spectral,vmin=s.max()*0.9)
   colorbar()
 
-def plot_fields_multimax(im, maxr = xrange(4,8,2) ):
+def plot_fields_multimax(im, maxr = range(4,8,2) ):
   figure()
   subplots_adjust( 0, 0, 1, 1, 0.05, 0.05 )
   for idx, r in enumerate(maxr):
@@ -135,7 +140,7 @@ def plot_fields_multimax(im, maxr = xrange(4,8,2) ):
     imshow( h, cmap = cm.jet )
     axis('off')
     subplot( 3, len(maxr), idx + 1*len(maxr) + 1 )
-    imshow( (m+pi)*180/pi, cmap = cm.hsv, vmin=0,vmax=360 )
+    imshow( old_div((m+pi)*180,pi), cmap = cm.hsv, vmin=0,vmax=360 )
     axis('off')
     subplot( 3, len(maxr), idx + 2*len(maxr) + 1 )
     imshow( s, cmap = cm.spectral, vmin = s.max()*0.9);
@@ -148,11 +153,11 @@ def plot_fields_multimax(im, maxr = xrange(4,8,2) ):
 
 def _impyramid( im ):
   evener = lambda x: x - x%2
-  R,C = map(evener, im.shape)
-  a = im[ :R:2,  :C:2]/4;
-  b = im[ :R:2, 1:C:2]/4;
-  c = im[1:R:2,  :C:2]/4;
-  d = im[1:R:2, 1:C:2]/4;
+  R,C = list(map(evener, im.shape))
+  a = old_div(im[ :R:2,  :C:2],4);
+  b = old_div(im[ :R:2, 1:C:2],4);
+  c = old_div(im[1:R:2,  :C:2],4);
+  d = old_div(im[1:R:2, 1:C:2],4);
 
   out = zeros( (R,C) )
   out = (a+b+c+d);
@@ -164,7 +169,7 @@ pyramid  = lambda im, n: reduce( rcompose, (im,) + n*(_impyramid,) )
 def eg():
   figure()
   subplots_adjust( 0, 0, 1, 1, 0.05, 0.05 )
-  for i in xrange(4):
+  for i in range(4):
     subplot(1,4,i+1)
     imshow( pyramid(im, i ), cmap=cm.gray )
     axis('off')
@@ -172,12 +177,12 @@ def eg():
 #
 # MULTIRESOLUTION FIELDS
 #
-def plot_fields_multiresolution( im, levels = range(3), maxr = 16  ):
+def plot_fields_multiresolution( im, levels = list(range(3)), maxr = 16  ):
   figure()
   subplots_adjust( 0, 0, 1, 1, 0.05, 0.05 )
   for idx, i in enumerate(levels):
     t = pyramid( im, i )
-    h,m,s = compute_seed_fields( t, maxr/(2**i) )
+    h,m,s = compute_seed_fields( t, old_div(maxr,(2**i)) )
 
     subplot( 4, len(levels), idx + 1 )
     imshow( t, cmap = cm.gray )
@@ -186,7 +191,7 @@ def plot_fields_multiresolution( im, levels = range(3), maxr = 16  ):
     imshow( h, cmap = cm.jet )
     axis('off')
     subplot( 4, len(levels), idx + 2*len(levels) + 1 )
-    imshow( (m+pi)*180/pi, cmap = cm.hsv, vmin=0,vmax=360 )
+    imshow( old_div((m+pi)*180,pi), cmap = cm.hsv, vmin=0,vmax=360 )
     axis('off')
     subplot( 4, len(levels), idx + 3*len(levels) + 1 )
     imshow( s, cmap = cm.jet, vmin = 0, vmax = 0.5 );
