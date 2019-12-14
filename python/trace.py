@@ -46,7 +46,8 @@ if not name:
   name=lib
 cWhisk = CDLL(name)
 
-_param_file = "default.parameters"
+# This has to be bytes for compatibility
+_param_file = bytes(b"default.parameters")
 if cWhisk.Load_Params_File(_param_file)==1: #returns 0 on success, 1 on failure
   cWhisk.Print_Params_File(_param_file)
   if cWhisk.Load_Params_File(_param_file)==1: #returns 0 on success, 1 on failure

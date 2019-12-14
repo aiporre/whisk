@@ -42,7 +42,8 @@ except:
 if ctraj._name==None:
   raise ImportError("Can not load whisk or traj shared library");
 
-_param_file = "default.parameters"
+# This has to be bytes for compatibility
+_param_file = bytes(b"default.parameters")
 if ctraj.Load_Params_File(_param_file)==1: #returns 0 on success, 1 on failure
   raise Exception("Could not load tracing parameters from file: %s"%_param_file)
 
