@@ -396,7 +396,7 @@ def Load_Whiskers( filename ):
   if not os.path.exists(filename):
     raise IOError("File not found.")
   nwhiskers = c_int(0)
-  wv = cWhisk.Load_Whiskers( filename, None, byref(nwhiskers) );
+  wv = cWhisk.Load_Whiskers(bytes(filename, encoding='utf-8'), None, byref(nwhiskers) );
   # organize into dictionary for ui.py {frameid}{segid}
   whiskers = {}
   for idx in range( nwhiskers.value ):
