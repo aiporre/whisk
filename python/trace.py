@@ -432,7 +432,9 @@ def Save_Whiskers( filename, whiskers ):
   #prep for save and save
   #print "Saving %d"%i
   #pdb.set_trace()
-  if not cWhisk.Save_Whiskers( filename, None, wv, i ):
+  
+  # Need to convert filename to bytes here
+  if not cWhisk.Save_Whiskers(bytes(filename, encoding='utf-8'), None, wv, i ):
     warn("Save Whiskers may have failed.")
 
 #

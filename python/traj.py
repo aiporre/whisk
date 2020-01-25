@@ -121,7 +121,9 @@ class MeasurementsTable(object):
     self._sort_state = None
     self._free_measurements = ctraj.Free_Measurements_Table
     if isinstance(datasource,str):
-      self._load(datasource)
+      # Probably this type-checking should include unicode and bytes
+      # Filename must be bytes
+      self._load(bytes(datasource, encoding='utf-8'))
     elif isinstance(datasource,dict):
       wvd      = datasource['whiskers']
       facehint = datasource['facehint']
