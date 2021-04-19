@@ -424,7 +424,7 @@ add_dependencies(whiskio_static ParameterParser)
 # MATLAB
 #
 
-  find_package(Matlab-rwp) #optional
+#  find_package(Matlab-rwp) #optional
   include(MatlabMexMacro)
 
   if(MATLAB_FOUND)
