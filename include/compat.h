@@ -29,7 +29,7 @@ typedef unsigned long long uint64_t;
 #define log2(x) (log(x)/log(2))       // there are fast tricks for finding int(log2(x))
 #endif                             
 
-#define  //_inline
+//#define  //_inline
 #define msvcextern extern
 
 #define hypotf _hypotf
