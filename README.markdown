@@ -69,7 +69,7 @@ under Windows, OS X, and Linux.  On a unix-y system, the procedure looks like th
         matlab/
         oldbuild/
         pipeline/
-        python/
+        whisk/
         src/
         ui/
 
@@ -79,7 +79,13 @@ under Windows, OS X, and Linux.  On a unix-y system, the procedure looks like th
         cd build
         cmake ..
         make
-   
+7. copy build binaries to `whisk\bin\`
+
+8. Install whisk package with: 
+    `pip install . `  or `python setup.py install`
+    
+9. (Optional) Include your binaries to the `PATH` environment variable.
+
 CMake works by building the Makefile, or other required project files, in the 
 "build" directory you created.  You don't have to use a Makefile; XCode projects,
 Eclipse projects, Visual Studio projects, etc ... can be generated.  To generate
