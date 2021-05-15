@@ -29,6 +29,15 @@ Tip: Git on Windows
 
 [msysgit]: http://code.google.com/p/msysgit/
 
+Installing without building for Windows10
+=========================================
+
+1. Create your conda or python environment (optional)
+2. run `python setup.py`
+3. Include `.whisk\bin` (absolute path of that) to the `PATH` environmental variable. 
+4. Test by running `python -c 'import whisk' ` and `trace`. 
+
+
 Building
 ========
 
@@ -79,12 +88,13 @@ under Windows, OS X, and Linux.  On a unix-y system, the procedure looks like th
         cd build
         cmake ..
         make
-7. copy build binaries to `whisk\bin\`
+7. copy build binaries to `whisk\bin\`. If you are not in Windows, maybe it would be better to delete the content of that folder before proceeding. 
 
 8. Install whisk package with: 
     `pip install . `  or `python setup.py install`
     
 9. (Optional) Include your binaries to the `PATH` environment variable.
+
 
 CMake works by building the Makefile, or other required project files, in the 
 "build" directory you created.  You don't have to use a Makefile; XCode projects,
