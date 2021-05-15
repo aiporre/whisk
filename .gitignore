@@ -7,3 +7,7 @@ ui/trace.py
 ui/traj.py
 build
 xcode
+.idea/ 
+.dist/ 
+*.egg-info/ 
+dist/ 
