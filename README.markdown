@@ -88,7 +88,7 @@ under Windows, OS X, and Linux.  On a unix-y system, the procedure looks like th
         cd build
         cmake ..
         make
-7. copy build binaries to `whisk\bin\`. If you are not in Windows, maybe it would be better to delete the content of that folder before proceeding. 
+7. copy build binaries to `bin/`. If you are not in Windows, maybe it would be better to delete the content of that folder before proceeding. 
 
 8. Install whisk package with: 
     `pip install . `  or `python setup.py install`
