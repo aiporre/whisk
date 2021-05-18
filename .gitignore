@@ -1,5 +1,7 @@
 *.swp
 *.so
+*.a
+*.dylib
 *.detectorbank
 *.parameters
 *.pyc

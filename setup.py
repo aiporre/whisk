@@ -11,4 +11,5 @@ setup(
    description='whisk janelia: whisker tracking system',
    long_description=open('README.markdown').read(),
    install_requires=[],
+   include_package_data=True
 )

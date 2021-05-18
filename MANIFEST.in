@@ -1,0 +1,5 @@
+recursive-include whisk/bin *
+include whisk/*.so
+include whisk/*.dll
+include whisk/*.a
+include whisk/*.dylib

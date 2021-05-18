@@ -33,7 +33,8 @@ Installing without building for Windows10
 =========================================
 
 1. Create your conda or python environment (optional)
-2. run `python setup.py`
+2. move `bin\` to `whisk\bin\`
+2. run `python setup.py install`
 3. Include `.whisk\bin` (absolute path of that) to the `PATH` environmental variable. 
 4. Test by running `python -c 'import whisk' ` and `trace`. 
 
